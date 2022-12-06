@@ -1,0 +1,363 @@
+import csv
+import glob
+import os
+import pathlib
+import re
+import sys
+from threading import Thread
+import time
+from pathlib import Path
+import datetime
+
+# sys.path.insert(1, 'C:\\Program Files\\obs-studio\\data\\obs-scripting\\64bit\\')
+
+import obspython as S
+
+FILE = 'FILE'
+
+LINK_ID = 'LINK ID'
+
+STATUS = 'STATUS'
+
+DATE = 'DATE'
+
+TYPE = 'TYPE'
+
+TIME = 'TIME'
+
+recording_path = "O:\RECORDINGS"
+
+csv_file_name = "testScriptFile.csv"
+
+file_path = Path(recording_path) / csv_file_name
+
+y_m_d_h_m_s = "%Y-%m-%d %H:%M:%S"
+
+
+def get_sec(time_str='1:23:45'):
+    """Get seconds from time."""
+    h, m, s = time_str.split(':')
+    return int(h) * 3600 + int(m) * 60 + int(s)
+
+
+def get_time_hh_mm_ss(seconds=0):
+    # get min and seconds first
+    mm, ss = divmod(seconds, 60)
+    # Get hours
+    hh, mm = divmod(mm, 60)
+
+    return f"{hh}:{mm}:{ss}"
+
+
+file_headers = [('%s' % TIME), ('%s' % TYPE), DATE, STATUS, LINK_ID, FILE]
+
+
+def append_data_to_file_from(json):
+    # list of column names
+    # Dictionary that we want to add as a new row
+    with open(file_path, 'a') as f_object:
+        dictwriter_object = csv.DictWriter(f_object, fieldnames=file_headers, lineterminator='\n')
+        dictwriter_object.writerow(json)
+        f_object.close()
+
+
+def create_event_file():
+    # filename = ''
+    # if os.name == 'nt':
+    #     # filename = 'C:/Users/Herna/Desktop/obstemp/testfileobs.csv'
+    #     filename = Path(recording_path) / "testScriptFile.csv"
+    # else:
+    #     # filename = '/Users/miguelhernandez/Desktop/obstemp/testfileobs.csv'
+    #     filename = Path(recording_path) / "testScriptFile.csv"
+
+    file_exists = Path(file_path).is_file()
+    # creates a new csv file with headers if it doesn't already exist
+    with open(file_path, 'a') as csvfile:
+        writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n', fieldnames=file_headers)
+        if not file_exists:
+            writer.writeheader()
+
+
+def list_files(path_list=[]):
+    print('listing files')
+    extensions = ('*.mkv', '*.mov', '*.mp4', '*mkv')
+    files = []
+    for path in path_list:
+        # print('path ', path)
+        for ext in extensions:
+            for file_path in Path(path).glob(ext):
+                files.append(file_path)
+    # print('files ', files)
+    return files
+
+
+def most_recent_file(path_list=[]):
+    path_list = list_files(path_list)
+
+    def most_recent(file_time_dict):
+        newest_date = datetime.datetime(1999, 1, 1, 22, 50, 50)
+        newest_path = ''
+        # nwest = {'empty': newest_date}
+        for k, v in file_time_dict.items():
+            if v > newest_date:
+                newest_date = v
+                newest_path = k
+        return newest_path
+
+    file_c_time = {}
+    for path in path_list:
+        c_timestamp = Path(path).stat().st_ctime
+        c_time = datetime.datetime.fromtimestamp(c_timestamp)
+        file_c_time.update({path: c_time})
+    newest = most_recent(file_c_time)
+    name, ext = os.path.splitext(Path(newest).name)
+    newest = str(most_recent(file_c_time))
+    newest = new_recording_file(newest)
+    newest = newest.replace(ext, '.mp4')
+    return newest
+
+
+class StopWatch:
+    def __init__(self):
+        self.start_time = None
+        self.stop_time = None
+
+    def start(self):
+        self.start_time = datetime.datetime.now()
+        return self.start_time
+
+    def stop(self):
+        self.stop_time = datetime.datetime.now()
+        return self.stop_time
+
+    def get_elapsed_time_str_not_formatted(self):
+        self.stop_time = datetime.datetime.now()
+        elapsed = (self.stop_time - self.start_time).total_seconds()
+        elapsed_str = str(elapsed).split('.')[0]
+        print(elapsed_str)
+        return elapsed_str
+
+    def get_elapsed_time_int(self):
+        return int(self.get_elapsed_time_str_not_formatted())
+
+
+stopwatch = StopWatch()
+
+print(S)
+
+
+class Data:
+    OutputDir = None
+    Extension = None
+    ExtensionMask = None
+    Remove_MKV = None
+    Delay = None
+
+    time = None
+    type = None
+    date = None
+    status = None
+    link_id = None
+    file = None
+
+    is_recording = False
+
+    def to_json(self):
+        clip_data_json = {}
+        clip_data_json.update(
+            {TIME: self.time, TYPE: self.type, DATE: self.date, STATUS: self.status, LINK_ID: self.link_id,
+             FILE: self.file})
+        return clip_data_json
+
+
+def increment_file_counter(file):
+    match = re.findall("\((.*?)\)", file)
+    if match:
+        old = match[0]
+        new_index = int(match.pop()) + 1
+        file = file.replace(old, str(new_index))
+    return file
+
+
+def new_recording_file(file):
+    parenthesis_pattern = "\((.*?)\)"
+    capture_paren = "(.\(..*\))"
+    date_pattern = "[0-9]*-[0-9]*-[0-9]*"
+
+    match_date = re.findall(date_pattern, file)
+    match_paren = re.findall(parenthesis_pattern, file)
+    match_to_remove = re.findall(capture_paren, file)
+    dte_str = ''
+    dte_format = '%m-%d-%y'
+    if match_date:
+        dte_str = match_date[0]
+        dte_match = datetime.datetime.strptime(dte_str, dte_format).strftime(dte_format)
+        dte_today = datetime.datetime.now().strftime(dte_format)
+        if dte_match != dte_today:
+            file = file.replace(dte_str, str(f'{dte_today}'))
+            if len(match_to_remove) == 1:  # remove parenthesis if first recording for today and last days has (2)
+                file = file.replace(match_to_remove.pop(), '')  # remove " (3)" from file name
+        if dte_match == dte_today:  # found a file with todays date should add the "( )"
+            # add (2).mkv if file exists
+            if len(match_paren) == 0:
+                file = file.replace(dte_str, str(f'{dte_today} (2)'))
+            if len(match_paren) == 1:
+                file = increment_file_counter(file)
+        return file
+
+
+class Application:
+    def __init__(self, callback, obs_settings, _id):
+        self.obs_data = obs_settings
+        self.hotkey_id = S.OBS_INVALID_HOTKEY_ID
+        self.hotkey_saved_key = None
+        self.callback = callback
+        self._id = _id
+
+        self.load_hotkey()
+        self.register_hotkey()
+        self.save_hotkey()
+
+    def register_hotkey(self):
+        description = "Htk " + str(self._id)
+        self.hotkey_id = S.obs_hotkey_register_frontend(
+            "htk_id" + str(self._id), description, self.callback
+        )
+        S.obs_hotkey_load(self.hotkey_id, self.hotkey_saved_key)
+
+    def load_hotkey(self):
+        self.hotkey_saved_key = S.obs_data_get_array(
+            self.obs_data, "htk_id" + str(self._id)
+        )
+        S.obs_data_array_release(self.hotkey_saved_key)
+
+    def save_hotkey(self):
+        self.hotkey_saved_key = S.obs_hotkey_save(self.hotkey_id)
+        S.obs_data_set_array(
+            self.obs_data, "htk_id" + str(self._id), self.hotkey_saved_key
+        )
+        S.obs_data_array_release(self.hotkey_saved_key)
+
+
+class h:
+    htk_copy = None  # this attribute will hold instance of Hotkey
+
+
+def cb1(pressed):
+    if pressed:
+        print("callback1: " + e1.txt, 'recording: ', Data.is_recording)
+        if Data.is_recording is True:
+            Data.time = get_time_hh_mm_ss(stopwatch.get_elapsed_time_int())
+            Data.type = e1.txt
+            Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
+            Data.status = ''
+            Data.link_id = ''
+            Data.file = ''
+            append_data_to_file_from(Data.to_json(Data))
+
+
+def cb2(pressed):
+    if pressed:
+        print("callback2: " + e2.txt)
+
+
+class e:
+    txt = "default txt"
+
+
+def frontend_event_handler(data):
+    global is_paused, stopwatch
+    global window_start
+    global loop_destroy
+    # t1 = Thread(most_recent_file, args=(recording_path, '\*'))
+
+    if data == S.OBS_FRONTEND_EVENT_RECORDING_STARTING:
+        window_start = True
+        is_paused = False
+        stopwatch.start()
+        file = most_recent_file([recording_path])
+        print('Current file ', file)
+        # update_the_file_name(file)
+        # def append_data_to_file_from(json):
+        Data.time = '00:00:00'
+        Data.type = 'SKIP'
+        Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
+        Data.status = ''
+        Data.link_id = ''
+        Data.file = file
+        append_data_to_file_from(Data.to_json(Data))
+        Data.is_recording = True
+        print('REC started..')
+
+    if data == S.OBS_FRONTEND_EVENT_RECORDING_STOPPED:
+        window_start = False
+        is_paused = False
+        is_recording = False
+        print('REC stops..')
+
+    if data == S.OBS_FRONTEND_EVENT_RECORDING_PAUSED:
+        is_paused = True
+        is_recording = False
+        # full_path = path_name+"/"
+        # print(full_path)
+        # most_recent_recording = most_recent_file(list_files([recording_path]))
+        # print('most recent ', most_recent_recording)
+
+        stopwatch.get_elapsed_time_str_not_formatted()
+        print('REC paused..')
+
+    if data == S.OBS_FRONTEND_EVENT_RECORDING_UNPAUSED:
+        is_paused = False
+        Data.is_recording = True
+        print('REC un-paused..')
+
+
+e1 = e()
+e2 = e()
+
+h1 = h()
+h2 = h()
+
+
+# def add_path(self, name, description):
+#     S.obs_properties_add_path(self.prop_obj, name, description,
+#                               S.OBS_PATH_DIRECTORY, "",
+#                               S.path.expanduser("~"))
+
+
+def script_properties():
+    props = S.obs_properties_create()
+    S.obs_properties_add_text(props, "_text1", "_text1:", S.OBS_TEXT_DEFAULT)
+    S.obs_properties_add_text(props, "_text2", "_text2:", S.OBS_TEXT_DEFAULT)
+
+    return props
+
+
+def script_update(settings):
+    # Data.OutputDir = S.obs_data_get_string(settings, "outputdir")
+    # Data.OutputDir = Data.OutputDir.replace('/', '\\')
+    # Data.Extension = S.obs_data_get_string(settings, "extension")
+    # Data.ExtensionMask = '\*' + Data.Extension
+    # Data.Remove_MKV = S.obs_data_get_bool(settings, "remove_mkv")
+    # Data.Delay = 1000 * S.obs_data_get_int(settings, "period")
+    # print(Data.Delay)
+
+    _text1 = S.obs_data_get_string(settings, "_text1")
+    _text2 = S.obs_data_get_string(settings, "_text2")
+    e1.txt = _text1
+    e2.txt = _text2
+
+
+def script_load(settings):
+    create_event_file()
+    Data.is_recording = False
+    h1.htk_copy = Application(cb1, settings, "h1_id")
+    h2.htk_copy = Application(cb2, settings, "h2_id")
+
+
+def script_save(settings):
+    h1.htk_copy.save_hotkey()
+    h2.htk_copy.save_hotkey()
+
+
+S.obs_frontend_add_event_callback(frontend_event_handler)
