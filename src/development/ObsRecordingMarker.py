@@ -228,7 +228,7 @@ class Application:
         self.save_hotkey()
 
     def register_hotkey(self):
-        description = "Htk " + str(self._id)
+        description = "Recording Marker " + str(self._id)
         self.hotkey_id = S.obs_hotkey_register_frontend(
             "htk_id" + str(self._id), description, self.callback
         )
@@ -256,25 +256,34 @@ class h:
 def cb1(pressed):
     if pressed:
         print("callback1: " + e1.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-        if Data.is_recording is True:
-            Data.time = get_time_hh_mm_ss(stopwatch.get_elapsed_time_int_for_file())
-            Data.type = e1.txt
-            Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
-            Data.status = ''
-            Data.link_id = ''
-            Data.file = ''
-            append_data_to_file_from(Data.to_json(Data))
+        data_for_file(e1)
+
+
+def data_for_file(e):
+    if Data.is_recording is True:
+        Data.time = get_time_hh_mm_ss(stopwatch.get_elapsed_time_int_for_file())
+        Data.type = e.txt
+        Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
+        Data.status = ''
+        Data.link_id = ''
+        Data.file = ''
+        append_data_to_file_from(Data.to_json(Data))
+
 
 def cb2(pressed):
     if pressed:
-        print("callback2: " + e2.txt)
+        print("callback2: " + e2.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        data_for_file(e1)
 
 def cb3(pressed):
     if pressed:
-        print("callback3: " + e3.txt)
+        print("callback3: " + e3.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        data_for_file(e1)
 
 class e:
     txt = "default txt"
+
+
 
 
 def frontend_event_handler(data):
@@ -368,9 +377,9 @@ def script_load(settings):
     Data.file_path_from_gui = S.obs_data_get_string(settings, "_text")
     create_event_file()
     Data.is_recording = False
-    h1.htk_copy = Application(cb1, settings, "h1_id")
-    h2.htk_copy = Application(cb2, settings, "h2_id")
-    h3.htk_copy = Application(cb3, settings, "h3_id")
+    h1.htk_copy = Application(cb1, settings, "Htk_1")
+    h2.htk_copy = Application(cb2, settings, "Htk_2")
+    h3.htk_copy = Application(cb3, settings, "Htk_2")
 
 
 

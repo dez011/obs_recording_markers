@@ -8,10 +8,10 @@ from threading import Thread
 import time
 from pathlib import Path
 import datetime
-
-# sys.path.insert(1, 'C:\\Program Files\\obs-studio\\data\\obs-scripting\\64bit\\')
-
 import obspython as S
+
+
+FILE_EXT = '.mp4'
 
 FILE = 'FILE'
 
@@ -30,6 +30,7 @@ recording_path = "O:\RECORDINGS"
 csv_file_name = "testScriptFile.csv"
 
 file_path = Path(recording_path) / csv_file_name
+
 
 y_m_d_h_m_s = "%Y-%m-%d %H:%M:%S"
 
@@ -62,32 +63,24 @@ def append_data_to_file_from(json):
 
 
 def create_event_file():
-    # filename = ''
-    # if os.name == 'nt':
-    #     # filename = 'C:/Users/Herna/Desktop/obstemp/testfileobs.csv'
-    #     filename = Path(recording_path) / "testScriptFile.csv"
-    # else:
-    #     # filename = '/Users/miguelhernandez/Desktop/obstemp/testfileobs.csv'
-    #     filename = Path(recording_path) / "testScriptFile.csv"
+    if 'test' in Data.file_path_from_gui:
+        Data.file_path_from_gui = file_path
+    file_exists = Path(Data.file_path_from_gui).is_file()
 
-    file_exists = Path(file_path).is_file()
     # creates a new csv file with headers if it doesn't already exist
-    with open(file_path, 'a') as csvfile:
+    with open(Data.file_path_from_gui, 'a') as csvfile:
         writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n', fieldnames=file_headers)
         if not file_exists:
             writer.writeheader()
 
 
 def list_files(path_list=[]):
-    print('listing files')
     extensions = ('*.mkv', '*.mov', '*.mp4', '*mkv')
     files = []
     for path in path_list:
-        # print('path ', path)
         for ext in extensions:
             for file_path in Path(path).glob(ext):
                 files.append(file_path)
-    # print('files ', files)
     return files
 
 
@@ -97,7 +90,7 @@ def most_recent_file(path_list=[]):
     def most_recent(file_time_dict):
         newest_date = datetime.datetime(1999, 1, 1, 22, 50, 50)
         newest_path = ''
-        # nwest = {'empty': newest_date}
+        # newest = {'empty': newest_date}
         for k, v in file_time_dict.items():
             if v > newest_date:
                 newest_date = v
@@ -113,7 +106,8 @@ def most_recent_file(path_list=[]):
     name, ext = os.path.splitext(Path(newest).name)
     newest = str(most_recent(file_c_time))
     newest = new_recording_file(newest)
-    newest = newest.replace(ext, '.mp4')
+    if e_remux.txt is True:
+        newest = newest.replace(ext, FILE_EXT)
     return newest
 
 
@@ -121,24 +115,39 @@ class StopWatch:
     def __init__(self):
         self.start_time = None
         self.stop_time = None
+        self.save_elapsed = 0
 
     def start(self):
         self.start_time = datetime.datetime.now()
+        Data.is_recording = True
         return self.start_time
 
     def stop(self):
         self.stop_time = datetime.datetime.now()
+        self.start_time = None
+        self.save_elapsed = 0
+        Data.is_recording = False
         return self.stop_time
 
-    def get_elapsed_time_str_not_formatted(self):
-        self.stop_time = datetime.datetime.now()
-        elapsed = (self.stop_time - self.start_time).total_seconds()
-        elapsed_str = str(elapsed).split('.')[0]
-        print(elapsed_str)
-        return elapsed_str
+    def pause(self):
+        self.save_elapsed += self.get_elapsed_time_int_for_file()
+        Data.is_recording = False
+        self.start_time = None
+        self.stop_time = None
 
-    def get_elapsed_time_int(self):
-        return int(self.get_elapsed_time_str_not_formatted())
+    def get_elapsed_time_str_not_formatted(self):
+        if Data.is_recording is True:
+            self.stop_time = datetime.datetime.now()
+            elapsed = (self.stop_time - self.start_time).total_seconds()
+            elapsed = elapsed + self.save_elapsed
+            elapsed_str = str(elapsed).split('.')[0]
+            return elapsed_str
+
+    def get_elapsed_time_int_for_file(self):
+        if Data.is_recording is True:
+            return int(self.get_elapsed_time_str_not_formatted())
+        else:
+            return None
 
 
 stopwatch = StopWatch()
@@ -159,7 +168,7 @@ class Data:
     status = None
     link_id = None
     file = None
-
+    file_path_from_gui = None
     is_recording = False
 
     def to_json(self):
@@ -219,7 +228,7 @@ class Application:
         self.save_hotkey()
 
     def register_hotkey(self):
-        description = "Htk " + str(self._id)
+        description = "Recording Marker " + str(self._id)
         self.hotkey_id = S.obs_hotkey_register_frontend(
             "htk_id" + str(self._id), description, self.callback
         )
@@ -242,27 +251,39 @@ class Application:
 class h:
     htk_copy = None  # this attribute will hold instance of Hotkey
 
+#STEP1 CREATE FUNCTION FOR NEW HOTKEY
 
 def cb1(pressed):
     if pressed:
-        print("callback1: " + e1.txt, 'recording: ', Data.is_recording)
-        if Data.is_recording is True:
-            Data.time = get_time_hh_mm_ss(stopwatch.get_elapsed_time_int())
-            Data.type = e1.txt
-            Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
-            Data.status = ''
-            Data.link_id = ''
-            Data.file = ''
-            append_data_to_file_from(Data.to_json(Data))
+        print("callback1: " + e1.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        data_for_file(e1)
+
+
+def data_for_file(e):
+    if Data.is_recording is True:
+        Data.time = get_time_hh_mm_ss(stopwatch.get_elapsed_time_int_for_file())
+        Data.type = e.txt
+        Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
+        Data.status = ''
+        Data.link_id = ''
+        Data.file = ''
+        append_data_to_file_from(Data.to_json(Data))
 
 
 def cb2(pressed):
     if pressed:
-        print("callback2: " + e2.txt)
+        print("callback2: " + e2.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        data_for_file(e1)
 
+def cb3(pressed):
+    if pressed:
+        print("callback3: " + e3.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        data_for_file(e1)
 
 class e:
     txt = "default txt"
+
+
 
 
 def frontend_event_handler(data):
@@ -277,8 +298,6 @@ def frontend_event_handler(data):
         stopwatch.start()
         file = most_recent_file([recording_path])
         print('Current file ', file)
-        # update_the_file_name(file)
-        # def append_data_to_file_from(json):
         Data.time = '00:00:00'
         Data.type = 'SKIP'
         Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
@@ -293,71 +312,89 @@ def frontend_event_handler(data):
         window_start = False
         is_paused = False
         is_recording = False
+        stopwatch.stop()
         print('REC stops..')
 
     if data == S.OBS_FRONTEND_EVENT_RECORDING_PAUSED:
         is_paused = True
         is_recording = False
-        # full_path = path_name+"/"
-        # print(full_path)
-        # most_recent_recording = most_recent_file(list_files([recording_path]))
-        # print('most recent ', most_recent_recording)
-
         stopwatch.get_elapsed_time_str_not_formatted()
+        stopwatch.pause()
         print('REC paused..')
 
     if data == S.OBS_FRONTEND_EVENT_RECORDING_UNPAUSED:
         is_paused = False
         Data.is_recording = True
+        stopwatch.start()
         print('REC un-paused..')
 
-
+#STEP 2 INSTANTIATE THE CLASSES
 e1 = e()
 e2 = e()
+e3 = e()
+e_recording_path = e()
+e_remux = e()
 
 h1 = h()
 h2 = h()
+h3 = h()
 
-
-# def add_path(self, name, description):
-#     S.obs_properties_add_path(self.prop_obj, name, description,
-#                               S.OBS_PATH_DIRECTORY, "",
-#                               S.path.expanduser("~"))
-
-
+#STEP3 ADD TO SCRIPT PROPERTIES
 def script_properties():
+    print('script props')
     props = S.obs_properties_create()
-    S.obs_properties_add_text(props, "_text1", "_text1:", S.OBS_TEXT_DEFAULT)
-    S.obs_properties_add_text(props, "_text2", "_text2:", S.OBS_TEXT_DEFAULT)
+    hotkey_1 = "Hotkey 1"
+    hotkey_2 = "Hotkey 2"
+    hotkey_3 = "Hotkey 3"
+
+    save_path = "Save Path"
+    # name, type, description
+    S.obs_properties_add_text(props, "_text", "Recording Path", S.OBS_TEXT_DEFAULT)
+    S.obs_properties_add_text(props, "_text1", hotkey_1, S.OBS_TEXT_DEFAULT)
+    S.obs_properties_add_text(props, "_text2", hotkey_2, S.OBS_TEXT_DEFAULT)
+    S.obs_properties_add_text(props, "_text3", hotkey_3, S.OBS_TEXT_DEFAULT)
+
+    _remux = S.obs_properties_add_bool(props, "_remux", "Remux Yes/No (Check/Uncheck)")
 
     return props
 
-
+#STEP 4 ADD TO SCRIPT UPDATE
 def script_update(settings):
-    # Data.OutputDir = S.obs_data_get_string(settings, "outputdir")
-    # Data.OutputDir = Data.OutputDir.replace('/', '\\')
-    # Data.Extension = S.obs_data_get_string(settings, "extension")
-    # Data.ExtensionMask = '\*' + Data.Extension
-    # Data.Remove_MKV = S.obs_data_get_bool(settings, "remove_mkv")
-    # Data.Delay = 1000 * S.obs_data_get_int(settings, "period")
-    # print(Data.Delay)
-
     _text1 = S.obs_data_get_string(settings, "_text1")
     _text2 = S.obs_data_get_string(settings, "_text2")
+    _text3 = S.obs_data_get_string(settings, "_text3")
+    _text = S.obs_data_get_string(settings, "_text")
+    _remux = S.obs_data_get_bool(settings, "_remux")
     e1.txt = _text1
     e2.txt = _text2
+    e3.txt = _text3
 
+    e_recording_path.txt = _text
+    e_remux.txt = _remux
 
+#STEP 5 ADD TO SCRIPT LOAD
 def script_load(settings):
+    Data.file_path_from_gui = S.obs_data_get_string(settings, "_text")
     create_event_file()
     Data.is_recording = False
-    h1.htk_copy = Application(cb1, settings, "h1_id")
-    h2.htk_copy = Application(cb2, settings, "h2_id")
+    h1.htk_copy = Application(cb1, settings, "Htk_1")
+    h2.htk_copy = Application(cb2, settings, "Htk_2")
+    h3.htk_copy = Application(cb3, settings, "Htk_2")
 
 
+
+#STEP 5 ADD TO SCRIPT SAVE
 def script_save(settings):
     h1.htk_copy.save_hotkey()
     h2.htk_copy.save_hotkey()
+    h3.htk_copy.save_hotkey()
 
+def script_description():
+    return ("OBS RECORDING MARKER\n\n"
+            "Restart OBS after adding the script\n"
+            "You have to select a Python 3.6.X version folder \n"
+            "*** File format: the/path/to/fileName 12-01-22.mp4 \n\n"
+            "Will have an instructional video on my YouTube channel\n"
+            "https://youtube.com/@DEZACTUALDOS\n\n")
 
 S.obs_frontend_add_event_callback(frontend_event_handler)
