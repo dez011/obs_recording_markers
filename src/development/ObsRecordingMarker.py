@@ -165,11 +165,27 @@ class Data:
     time = None
     type = None
     date = None
-    status = None
+    status = ''
     link_id = None
     file = None
     file_path_from_gui = None
     is_recording = False
+
+    index_reset_flag = False
+    indx = 1
+
+    @staticmethod
+    def set_flag():
+        if Data.index_reset_flag is True:
+            Data.indx = 1
+        Data.index_reset_flag = True
+
+
+    @staticmethod
+    def get_string_with_index(value):
+        temp = Data.indx
+        Data.indx += 1
+        return f'{value}{str(temp)}'
 
     def to_json(self):
         clip_data_json = {}
@@ -214,6 +230,16 @@ def new_recording_file(file):
                 file = increment_file_counter(file)
         return file
 
+def data_for_file(e):
+    if Data.is_recording is True:
+        Data.time = get_time_hh_mm_ss(stopwatch.get_elapsed_time_int_for_file())
+        Data.type = e.txt
+        Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
+        Data.status = ''
+        Data.link_id = ''
+        Data.file = ''
+        append_data_to_file_from(Data.to_json(Data))
+
 
 class Application:
     def __init__(self, callback, obs_settings, _id):
@@ -247,42 +273,110 @@ class Application:
         )
         S.obs_data_array_release(self.hotkey_saved_key)
 
+def update_last_row(times_str='10-10'):
+    def get_times(times_as_str):
+        times_list = times_as_str.split('-')
+        start = int(times_list[0])
+        end = int(times_list[1])
+        return start, end
+
+    def to_string(type_left, type_right):
+        return f'{type_left}-{type_right}'
+
+    import pandas as pd
+
+    # Load the CSV file into a dataframe
+    df = pd.read_csv(csv_file_name)
+
+    # Update the bottom row
+    bottom_row = df.loc[df.index[-1]].copy()
+
+    # bottom_row["TYPE"] += 1
+    print('TYPE ', bottom_row['TYPE'])
+    start_diff, end_diff = get_times(bottom_row['TYPE'])
+
+    start_time, end_time = get_times(str_time)
+
+    if start_time != 0:
+        start_diff += start_time
+    if end_time != 0:
+        end_diff += end_time
+
+    new_row_val = to_string(start_diff, end_diff)
+    print('new row val ', new_row_val)
+    bottom_row['TYPE'] = new_row_val
+
+    # Write the updated row back to the dataframe
+    df.loc[df.index[-1]] = bottom_row
+
+    # Write the updated dataframe to the CSV file
+    df.to_csv('testfile.csv', mode='w', index=False)
+
+
+# clip_data_json = {}
+# clip_data_json.update({'TIME': '00:01:00', 'TYPE': '45-10', })
+
+# append_data_to_file_from(clip_data_json)
+# update_last_row(start_time=10, end_time=10)
 
 class h:
     htk_copy = None  # this attribute will hold instance of Hotkey
 
 #STEP1 CREATE FUNCTION FOR NEW HOTKEY
-
 def cb1(pressed):
     if pressed:
         print("callback1: " + e1.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
         data_for_file(e1)
 
 
-def data_for_file(e):
-    if Data.is_recording is True:
-        Data.time = get_time_hh_mm_ss(stopwatch.get_elapsed_time_int_for_file())
-        Data.type = e.txt
-        Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
-        Data.status = ''
-        Data.link_id = ''
-        Data.file = ''
-        append_data_to_file_from(Data.to_json(Data))
-
-
 def cb2(pressed):
     if pressed:
         print("callback2: " + e2.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-        data_for_file(e1)
+        data_for_file(e2)
+        # set_stream_delay_buffer_volume_to_zero()
 
 def cb3(pressed):
     if pressed:
         print("callback3: " + e3.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        data_for_file(e3)
+def cb4(pressed):
+    if pressed:
+        print("callback4: " + e4.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        data_for_file(e4)
+def cb5(pressed):
+    if pressed:
+        print("callback5: " + e5.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        data_for_file(e5)
+def cb6(pressed):
+    if pressed:
+        print("callback6: " + e6.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        data_for_file(e6)
+def cb7(pressed):
+    if pressed:
+        print("callback7: " + e7.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
         data_for_file(e1)
+def cb8(pressed):
+    if pressed:
+        print("callback8: " + e8.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        if 'end' in e8.txt or 'start' in e8.txt:
+            update_last_row(e8.txt.split().pop(1))
+        else:
+            data_for_file(e1)
+
+#ADD IT TO THIS LIST
+cb_list = [cb1, cb2, cb3, cb4,cb5, cb6, cb7,cb8 ]
+
 
 class e:
     txt = "default txt"
 
+# def set_stream_delay_buffer_volume_to_zero():
+#   # Get the current live stream
+#   stream = S.get_current_service().get_preview_stream()
+#
+#   # Set the stream delay buffer volume to 0
+#   stream.set_delay_buffer_volume(0)
+#   print('set the buffer to 0')
 
 
 
@@ -332,62 +426,102 @@ def frontend_event_handler(data):
 e1 = e()
 e2 = e()
 e3 = e()
+e4 = e()
+e5 = e()
+e6 = e()
+e7 = e()
+e8 = e()
+
+#ADD IT TO THIS LIST
+e_list = [e1, e2, e3, e4, e5, e6, e7, e8]
+
 e_recording_path = e()
 e_remux = e()
 
+#STEP 2.1 INSTANTIATHE THE HOTKEY HOLDER
 h1 = h()
 h2 = h()
 h3 = h()
+h4 = h()
+h5 = h()
+h6 = h()
+h7 = h()
+h8 = h()
+
+#ADD IT TO THIS LIST
+h_list = [h1, h2, h3, h4, h5, h6, h7, h8]
+
 
 #STEP3 ADD TO SCRIPT PROPERTIES
 def script_properties():
-    print('script props')
+    Data.set_flag()
     props = S.obs_properties_create()
-    hotkey_1 = "Hotkey 1"
-    hotkey_2 = "Hotkey 2"
-    hotkey_3 = "Hotkey 3"
+    hotkey_1 = Data.get_string_with_index('Hotkey ')
+    hotkey_2 = Data.get_string_with_index('Hotkey ')
+    hotkey_3 = Data.get_string_with_index('Hotkey ')
+    hotkey_4 = Data.get_string_with_index('Hotkey ')
+    hotkey_5 = Data.get_string_with_index('Hotkey ')
+    hotkey_6 = Data.get_string_with_index('Hotkey ')
+    hotkey_7 = Data.get_string_with_index('Hotkey ')
+    hotkey_8 = Data.get_string_with_index('Hotkey ')
 
-    save_path = "Save Path"
-    # name, type, description
+    #UPDATE THE LIST
+    hotkey_list = [hotkey_1, hotkey_2, hotkey_3, hotkey_4, hotkey_5, hotkey_6, hotkey_7, hotkey_8]
+
+
+    Data.indx = 1
+    for key in hotkey_list:
+        S.obs_properties_add_text(props, Data.get_string_with_index('_text'), key, S.OBS_TEXT_DEFAULT)
+
     S.obs_properties_add_text(props, "_text", "Recording Path", S.OBS_TEXT_DEFAULT)
-    S.obs_properties_add_text(props, "_text1", hotkey_1, S.OBS_TEXT_DEFAULT)
-    S.obs_properties_add_text(props, "_text2", hotkey_2, S.OBS_TEXT_DEFAULT)
-    S.obs_properties_add_text(props, "_text3", hotkey_3, S.OBS_TEXT_DEFAULT)
-
     _remux = S.obs_properties_add_bool(props, "_remux", "Remux Yes/No (Check/Uncheck)")
 
     return props
 
 #STEP 4 ADD TO SCRIPT UPDATE
 def script_update(settings):
-    _text1 = S.obs_data_get_string(settings, "_text1")
-    _text2 = S.obs_data_get_string(settings, "_text2")
-    _text3 = S.obs_data_get_string(settings, "_text3")
+    Data.indx = 1
+    _text1 = text_update(settings)
+    _text2 = text_update(settings)
+    _text3 = text_update(settings)
+    _text4 = text_update(settings)
+    _text5 = text_update(settings)
+    _text6 = text_update(settings)
+    _text7 = text_update(settings)
+    _text8 = text_update(settings)
+
+    #UPDATE THE LIST
+    text_list = [_text1, _text2, _text3, _text4, _text5, _text6, _text7, _text8]
+
     _text = S.obs_data_get_string(settings, "_text")
     _remux = S.obs_data_get_bool(settings, "_remux")
-    e1.txt = _text1
-    e2.txt = _text2
-    e3.txt = _text3
+
+    for i in range(len(e_list)):
+        e_list[i].txt = text_list[i]
 
     e_recording_path.txt = _text
     e_remux.txt = _remux
+
+
+def text_update(settings):
+    index = Data.get_string_with_index("_text")
+    return S.obs_data_get_string(settings, index)
+
 
 #STEP 5 ADD TO SCRIPT LOAD
 def script_load(settings):
     Data.file_path_from_gui = S.obs_data_get_string(settings, "_text")
     create_event_file()
     Data.is_recording = False
-    h1.htk_copy = Application(cb1, settings, "Htk_1")
-    h2.htk_copy = Application(cb2, settings, "Htk_2")
-    h3.htk_copy = Application(cb3, settings, "Htk_2")
-
+    Data.indx = 1
+    for i in range(len(cb_list)):
+        h_list[i].htk_copy = Application(cb_list[i], settings, Data.get_string_with_index('Htk_'))
 
 
 #STEP 5 ADD TO SCRIPT SAVE
 def script_save(settings):
-    h1.htk_copy.save_hotkey()
-    h2.htk_copy.save_hotkey()
-    h3.htk_copy.save_hotkey()
+    for key in h_list:
+        key.htk_copy.save_hotkey()
 
 def script_description():
     return ("OBS RECORDING MARKER\n\n"
