@@ -43,7 +43,7 @@ y_m_d_h_m_s = "%Y-%m-%d %H:%M:%S"
 
 extensions = ('*.mkv', '*.mov', '*.mp4', '*mkv')
 
-test = False
+test = True
 
 
 def get_sec(time_str='1:23:45'):
@@ -286,12 +286,31 @@ class Application:
 
 
 def delete_last_row():
-    import pandas as pd
-    df = pd.read_csv(Data.file_path_from_gui)
-    start = df.size
-    df.drop(df.index[-1], inplace=True)
-    df.to_csv(Data.file_path_from_gui, index=False)
-    end = df.size
+    with open(Data.file_path_from_gui, 'r') as input_file:
+        # Create a CSV reader
+        reader = csv.DictReader(input_file)
+
+        # Read all the rows of the input file into a list
+        rows = list(reader)
+        start = len(rows)
+
+        removed_row = rows[:-1]
+
+    # Open the input CSV file in write mode
+    with open(Data.file_path_from_gui, 'w') as output_file:
+        # Create a CSV writer
+        writer = csv.DictWriter(output_file, fieldnames=file_headers, lineterminator='\n')
+
+        # Write the header row
+        writer.writeheader()
+
+        # Write all the rows (except the last one) to the output file
+        end = 0
+        for row in removed_row:
+            end += 1
+            writer.writerow(row)
+
+
     if end < start:
         return 'Deleted last row'
     else:
@@ -311,38 +330,49 @@ def update_last_row(times_str='10:10 mod'):
     def to_string(type_left, type_right):
         return f'{type_left}:{type_right}'
 
-    import pandas as pd
+    # Open the input CSV file in read mode
+    # with open(recording_path +'/testScriptFiletestMaster.csv', 'r') as input_file:
 
-    # Load the CSV file into a dataframe
+    with open(Data.file_path_from_gui, 'r') as input_file:
+        # Create a CSV reader
+        reader = csv.DictReader(input_file)
 
-    # file_path = Data.file_path_from_gui_name(Data)
-    df = pd.read_csv(Data.file_path_from_gui)
+        # Read all the rows of the input file into a list
+        rows = list(reader)
+        start = len(rows)
 
-    # Update the bottom row
-    bottom_row = df.loc[df.index[-1]].copy()
+        # Remove the last row from the list
+        last_row = rows[-1]
 
-    # bottom_row["TYPE"] += 1
-    start_time, end_time = get_times(times_str)
-    if start_time is None or end_time is None:
-        return None
-    start_diff, end_diff = get_times(bottom_row['TYPE'])
+        start_time, end_time = get_times(times_str)
+        if start_time is None or end_time is None:
+            return None
+        start_diff, end_diff = get_times(last_row['TYPE'])
 
-    if start_time != 0:
-        start_diff += start_time
-    if end_time != 0:
-        end_diff += end_time
+        if start_time != 0:
+            start_diff += start_time
+        if end_time != 0:
+            end_diff += end_time
 
-    new_row_val = to_string(start_diff, end_diff)
-    bottom_row['TYPE'] = new_row_val
+        new_row_val = to_string(start_diff, end_diff)
+        last_row['TYPE'] = new_row_val
 
-    # Write the updated row back to the dataframe
-    df.loc[df.index[-1]] = bottom_row
+        # removed_row = rows[:-1]
 
-    # Write the updated dataframe to the CSV file
-    file_name = Data.file_path_from_gui
-    df.to_csv(file_name, mode='w', index=False)
-    return df.loc[df.index[-1]]
+    # Open the input CSV file in write mode
+    with open(Data.file_path_from_gui, 'w') as output_file:
+        # Create a CSV writer
+        writer = csv.DictWriter(output_file, fieldnames=file_headers, lineterminator='\n')
 
+        # Write the header row
+        writer.writeheader()
+
+        # Write all the rows (except the last one) to the output file
+        end = 0
+        for row in rows:
+            end += 1
+            writer.writerow(row)
+    return last_row
 
 class h:
     htk_copy = None  # this attribute will hold instance of Hotkey
@@ -556,17 +586,6 @@ def script_update(settings):
 
 # STEP 5 ADD TO SCRIPT LOAD
 def script_load(settings):
-    # print('Loaded OBS Recording Markers')
-    # os_ = platform.system()
-    # if test:
-    #     print('is test for ', os_)
-    #     if os_ == 'Darwin':
-    #         mac_path = str(Path('/Users/miguelhernandez/Documents/testObsScript') / csv_file_name)
-    #         Data.file_path_from_gui = mac_path
-    #         print('Set mac path ', Data.file_path_from_gui)
-    #     if os_ == 'win32':
-    #         Data.file_path_from_gui = file_path
-
     Data.file_path_from_gui = S.obs_data_get_string(settings, "_text")
 
     create_event_file()
@@ -601,5 +620,7 @@ def script_description():
             "Will have an instructional video on my YouTube channel\n"
             "https://youtube.com/@DEZACTUALDOS\n\n")
 
-
-S.obs_frontend_add_event_callback(frontend_event_handler)
+try:
+    S.obs_frontend_add_event_callback(frontend_event_handler)
+except:
+    pass
