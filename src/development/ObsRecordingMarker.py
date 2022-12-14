@@ -9,7 +9,15 @@ import time
 from pathlib import Path
 import datetime
 import platform
-import obspython as S
+
+# import pandas as pd
+
+try:
+    import obspython as S
+
+    print(S)
+except:
+    pass
 
 FILE_EXT = '.mp4'
 
@@ -29,13 +37,13 @@ recording_path = "O:\RECORDINGS"
 
 csv_file_name = "testScriptFile.csv"
 
-file_path = Path(recording_path) / csv_file_name
+# file_path = Path(recording_path) / csv_file_name
 
 y_m_d_h_m_s = "%Y-%m-%d %H:%M:%S"
 
 extensions = ('*.mkv', '*.mov', '*.mp4', '*mkv')
 
-test = True
+test = False
 
 
 def get_sec(time_str='1:23:45'):
@@ -64,19 +72,18 @@ def append_data_to_file_from(json={TYPE: '00:00', TIME: '00:10:00'}):
         dictwriter_object = csv.DictWriter(f_object, fieldnames=file_headers, lineterminator='\n')
         dictwriter_object.writerow(json)
         f_object.close()
+    return 'Appended to file ', json
 
 
 def create_event_file():
-    # darwin win32
     os_ = platform.system()
-    if test == True:
-        print('is test for ', os_)
+    if test:
         if os_ == 'Darwin':
-            mac_path = str(Path('/Users/miguelhernandez/Documents/testObsScript') / csv_file_name)
+            mac_path = str(Path('/Users/miguelhernandez/Documents/testObsScript') / Data.file_path_from_gui_name())
             Data.file_path_from_gui = mac_path
-            print('Set mac path ', Data.file_path_from_gui)
-        if os_ == 'win23':
-            Data.file_path_from_gui = file_path
+        if os_ == 'Windows':
+            win_path = str(Path("O:\RECORDINGS") / 'devTest.csv')
+            Data.file_path_from_gui = win_path
     file_exists = Path(Data.file_path_from_gui).is_file()
 
     # creates a new csv file with headers if it doesn't already exist
@@ -163,8 +170,6 @@ class StopWatch:
 
 stopwatch = StopWatch()
 
-print(S)
-
 
 class Data:
     OutputDir = None
@@ -182,14 +187,9 @@ class Data:
     file_path_from_gui = None
     is_recording = False
 
-    # index_reset_flag = False
-    # indx = 1
-
-    # @staticmethod
-    # def get_string_with_index(value):
-    #     temp = Data.indx
-    #     Data.indx += 1
-    #     return f'{value}{str(temp)}'
+    def file_path_from_gui_name(self):
+        print('gui path ', Data.file_path_from_gui)
+        return Path(self.file_path_from_gui).name
 
     def to_json(self):
         clip_data_json = {}
@@ -200,8 +200,8 @@ class Data:
 
 
 def increment_file_counter(file):
-    file_countern_pattern = "\((.*?)\)"
-    match = re.findall(file_countern_pattern, file)
+    file_counter_pattern = "\((.*?)\)"
+    match = re.findall(file_counter_pattern, file)
     if match:
         old = match[0]
         # sometimes the regex increments the file extension
@@ -240,6 +240,7 @@ def new_recording_file(file):
 
 
 def data_for_file(e):
+    data = None
     if Data.is_recording is True:
         Data.time = get_time_hh_mm_ss(stopwatch.get_elapsed_time_int_for_file())
         Data.type = e.txt
@@ -247,7 +248,8 @@ def data_for_file(e):
         Data.status = ''
         Data.link_id = ''
         Data.recording_file = ''
-        append_data_to_file_from(Data.to_json(Data))
+        data = append_data_to_file_from(Data.to_json(Data))
+    return data
 
 
 class Application:
@@ -283,7 +285,21 @@ class Application:
         S.obs_data_array_release(self.hotkey_saved_key)
 
 
-def update_last_row(times_str='10:10'):
+def delete_last_row():
+    import pandas as pd
+    df = pd.read_csv(Data.file_path_from_gui)
+    start = df.size
+    df.drop(df.index[-1], inplace=True)
+    df.to_csv(Data.file_path_from_gui, index=False)
+    end = df.size
+    if end < start:
+        return 'Deleted last row'
+    else:
+        return 'Could not delete'
+
+
+def update_last_row(times_str='10:10 mod'):
+    # also can subtract '-10:10'
     def get_times(times_as_str):
         times_list = times_as_str.split(':')
         if len(times_list) < 2:
@@ -293,18 +309,19 @@ def update_last_row(times_str='10:10'):
         return start, end
 
     def to_string(type_left, type_right):
-        return f'{type_left}-{type_right}'
+        return f'{type_left}:{type_right}'
 
     import pandas as pd
 
     # Load the CSV file into a dataframe
-    df = pd.read_csv(csv_file_name)
+
+    # file_path = Data.file_path_from_gui_name(Data)
+    df = pd.read_csv(Data.file_path_from_gui)
 
     # Update the bottom row
     bottom_row = df.loc[df.index[-1]].copy()
 
     # bottom_row["TYPE"] += 1
-    print('TYPE ', bottom_row['TYPE'])
     start_time, end_time = get_times(times_str)
     if start_time is None or end_time is None:
         return None
@@ -316,22 +333,16 @@ def update_last_row(times_str='10:10'):
         end_diff += end_time
 
     new_row_val = to_string(start_diff, end_diff)
-    print('new row val ', new_row_val)
     bottom_row['TYPE'] = new_row_val
 
     # Write the updated row back to the dataframe
     df.loc[df.index[-1]] = bottom_row
 
     # Write the updated dataframe to the CSV file
-    file_name = Path(Data.file_path_from_gui).name
+    file_name = Data.file_path_from_gui
     df.to_csv(file_name, mode='w', index=False)
+    return df.loc[df.index[-1]]
 
-
-# clip_data_json = {}
-# clip_data_json.update({'TIME': '00:01:00', 'TYPE': '45-10', })
-
-# append_data_to_file_from(clip_data_json)
-# update_last_row(start_time=10, end_time=10)
 
 class h:
     htk_copy = None  # this attribute will hold instance of Hotkey
@@ -340,59 +351,73 @@ class h:
 # STEP1 CREATE FUNCTION FOR NEW HOTKEY
 def cb1(pressed):
     if pressed:
-        print("callback1: " + e1.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-        data_for_file(e1)
+        return cb_effects(e1)
 
 
 def cb2(pressed):
     if pressed:
-        print("callback2: " + e2.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-        data_for_file(e2)
-        # set_stream_delay_buffer_volume_to_zero()
+        return cb_effects(e2)
 
 
 def cb3(pressed):
     if pressed:
-        print("callback3: " + e3.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-        data_for_file(e3)
+        return cb_effects(e3)
 
 
 def cb4(pressed):
     if pressed:
-        print("callback4: " + e4.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-        data_for_file(e4)
+        return cb_effects(e4)
 
 
 def cb5(pressed):
     if pressed:
-        print("callback5: " + e5.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-        data_for_file(e5)
+        return cb_effects(e5)
 
 
 def cb6(pressed):
     if pressed:
-        print("callback6: " + e6.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-        data_for_file(e6)
+        return cb_effects(e6)
 
 
 def cb7(pressed):
     if pressed:
-        print("callback7: " + e7.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-        data_for_file(e7)
+        return cb_effects(e7)
 
 
-def cb8(pressed):
+def cb8(pressed, e_text_test='ONLY FOR TESTS'):
+    text_test(e_text_test)
     if pressed:
-        print("callback8: " + e8.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-        if 'mod' in e8.txt:
-            update_last_row(e8.txt.split().pop(1))
-            # hanlde None, None return
+        return cb_effects(e8)
+
+
+def text_test(e8_text_test):
+    if e8_text_test is not None:
+        e8.txt = e8_text_test
+
+
+def cb_effects(e):
+    if e.txt is None:
+        return 'Hotkey has no text ', e.txt
+    print("callback: " + e.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+    if 'mod' in e.txt:
+        print('Modifying...')
+        mod = e.txt
+        s_e_pattern = r"([-][0-9]*:[0-9]*|[0-9]*:[0-9]*)"
+        match_s_e_mod = re.findall(':', mod)
+        if len(match_s_e_mod) > 1 or len(match_s_e_mod) == 0:
+            return 'Invalid mod. Should be "10:00 mod" startSeconds:endSeconds modArg'
+        match_s_e_mod = re.match(s_e_pattern, mod)
+        if match_s_e_mod:
+            last_row = update_last_row(match_s_e_mod[0])
+            return last_row
         else:
-            data_for_file(e8)
-
-
-# ADD IT TO THIS LIST
-cb_list = [cb1, cb2, cb3, cb4, cb5, cb6, cb7, cb8]
+            return 'No match for pattern "10:00 mod" startSeconds:endSeconds modArg when modifying last row'
+    elif 'del' in e.txt:
+        print('Deleting...')
+        return delete_last_row()
+    else:
+        appended_data = data_for_file(e8)
+        return appended_data
 
 
 class e:
@@ -531,16 +556,16 @@ def script_update(settings):
 
 # STEP 5 ADD TO SCRIPT LOAD
 def script_load(settings):
-    print('Loaded OBS Recording Markers')
-    os_ = platform.system()
-    if test:
-        print('is test for ', os_)
-        if os_ == 'Darwin':
-            mac_path = str(Path('/Users/miguelhernandez/Documents/testObsScript') / csv_file_name)
-            Data.file_path_from_gui = mac_path
-            print('Set mac path ', Data.file_path_from_gui)
-        if os_ == 'win32':
-            Data.file_path_from_gui = file_path
+    # print('Loaded OBS Recording Markers')
+    # os_ = platform.system()
+    # if test:
+    #     print('is test for ', os_)
+    #     if os_ == 'Darwin':
+    #         mac_path = str(Path('/Users/miguelhernandez/Documents/testObsScript') / csv_file_name)
+    #         Data.file_path_from_gui = mac_path
+    #         print('Set mac path ', Data.file_path_from_gui)
+    #     if os_ == 'win32':
+    #         Data.file_path_from_gui = file_path
 
     Data.file_path_from_gui = S.obs_data_get_string(settings, "_text")
 
