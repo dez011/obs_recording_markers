@@ -241,11 +241,11 @@ def get_processing_new_filename(found_newest_file):
         return found_newest_file
 
 
-def data_for_file(e):
+def data_for_file(_e):
     data = None
     if Data.is_recording is True:
         Data.time = get_time_hh_mm_ss(stopwatch.get_elapsed_time_int_for_file())
-        Data.type = e.txt
+        Data.type = _e.txt
         Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
         Data.status = ''
         Data.link_id = ''
@@ -333,7 +333,6 @@ def update_last_row(times_str='10:10 mod'):
 
     # Open the input CSV file in read mode
     # with open(recording_path +'/testScriptFiletestMaster.csv', 'r') as input_file:
-
     with open(Data.file_path_from_gui, 'r') as input_file:
         # Create a CSV reader
         reader = csv.DictReader(input_file)
@@ -427,29 +426,34 @@ def text_test(e8_text_test):
         e8.txt = e8_text_test
 
 
-def cb_effects(e):
-    if e.txt is None:
-        return 'Hotkey has no text ', e.txt
+def cb_effects(_e):
+    if _e.txt is None:
+        return 'Hotkey has no text ', _e.txt
     if Data.is_recording:
-        print("callback: " + e.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-        if 'mod' in e.txt:
+        print("callback: " + _e.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        if 'mod' in _e.txt:
             print('Modifying...')
-            mod = e.txt
+            mod = _e.txt
             s_e_pattern = r"([-][0-9]*:[0-9]*|[0-9]*:[0-9]*)"
             match_s_e_mod = re.findall(':', mod)
             if len(match_s_e_mod) > 1 or len(match_s_e_mod) == 0:
                 return 'Invalid mod. Should be "10:00 mod" startSeconds:endSeconds modArg'
             match_s_e_mod = re.match(s_e_pattern, mod)
             if match_s_e_mod:
-                last_row = update_last_row(match_s_e_mod[0])
+                # last_row = update_last_row(match_s_e_mod[0])
+                print(_e.txt)
+                x = _e.txt.split(" ")
+                x = x[0]
+                print(x)
+                last_row = update_last_row(x)
                 return last_row
             else:
                 return 'No match for pattern "10:00 mod" startSeconds:endSeconds modArg when modifying last row'
-        elif 'del' in e.txt:
+        elif 'del' in _e.txt:
             print('Deleting...')
             return delete_last_row()
         else:
-            appended_data = data_for_file(e8)
+            appended_data = data_for_file(_e)
             return appended_data
     else:
         return 'Not recording'
@@ -479,7 +483,6 @@ def frontend_event_handler(data):
         is_paused = False
         stopwatch.start()
         file = most_recent_file([recording_path])
-        print('Current file ', file)
         Data.time = '00:00:00'
         Data.type = 'SKIP'
         Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
