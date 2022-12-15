@@ -82,7 +82,7 @@ def create_event_file():
             mac_path = str(Path('/Users/miguelhernandez/Documents/testObsScript') / Data.file_path_from_gui_name())
             Data.file_path_from_gui = mac_path
         if os_ == 'Windows':
-            win_path = str(Path("O:\RECORDINGS") / 'devTest.csv')
+            win_path = str(Path("O:\RECORDINGS\TESTS") / 'devTest.csv')
             Data.file_path_from_gui = win_path
     file_exists = Path(Data.file_path_from_gui).is_file()
 
@@ -93,40 +93,42 @@ def create_event_file():
             writer.writeheader()
 
 
-def list_files(path_list=[]):
-    files = []
-    for path in path_list:
-        for ext in extensions:
-            for file_path in Path(path).glob(ext):
-                files.append(file_path)
-    return files
-
-
 def most_recent_file(path_list=[]):
-    path_list = list_files(path_list)
-
     def most_recent(file_time_dict):
         newest_date = datetime.datetime(1999, 1, 1, 22, 50, 50)
         newest_path = ''
-        # newest = {'empty': newest_date}
+        # newest_not_processing_file = {'empty': newest_date}
         for k, v in file_time_dict.items():
             if v > newest_date:
                 newest_date = v
                 newest_path = k
         return newest_path
 
+    def list_files(path_list=[]):
+        files = []
+        for path in path_list:
+            for ext in extensions:
+                for file_path in Path(path).glob(ext):
+                    files.append(file_path)
+        print(files)
+        return files
+
+    print(path_list)
+    path_list = list_files(path_list)
+
     file_c_time = {}
     for path in path_list:
         c_timestamp = Path(path).stat().st_ctime
         c_time = datetime.datetime.fromtimestamp(c_timestamp)
         file_c_time.update({path: c_time})
-    newest = most_recent(file_c_time)
-    name, ext = os.path.splitext(Path(newest).name)
-    newest = str(most_recent(file_c_time))
-    newest = new_recording_file(newest)
+
+    newest_not_processing_file = most_recent(file_c_time)
+    name, ext = os.path.splitext(Path(newest_not_processing_file).name)
+    newest_not_processing_file = str(most_recent(file_c_time))
+    assumed_newest_file = get_processing_new_filename(newest_not_processing_file)
     if e_remux.txt is True:
-        newest = newest.replace(ext, FILE_EXT)
-    return newest
+        assumed_newest_file = assumed_newest_file.replace(ext, FILE_EXT)
+    return assumed_newest_file
 
 
 class StopWatch:
@@ -188,7 +190,6 @@ class Data:
     is_recording = False
 
     def file_path_from_gui_name(self):
-        print('gui path ', Data.file_path_from_gui)
         return Path(self.file_path_from_gui).name
 
     def to_json(self):
@@ -199,27 +200,28 @@ class Data:
         return clip_data_json
 
 
-def increment_file_counter(file):
-    file_counter_pattern = "\((.*?)\)"
-    match = re.findall(file_counter_pattern, file)
-    if match:
-        old = match[0]
-        # sometimes the regex increments the file extension
-        if old in extensions:
-            return file
-        new_index = int(match.pop()) + 1
-        file = file.replace(old, str(new_index))
-    return file
+def get_processing_new_filename(found_newest_file):
+    #windows doesn't recognize the newest file until the obs thread
+    #finishes.  Implement thread to hopefully not need this
+    def increment_file_counter(file_to_increment):
+        file_counter_pattern = "\((.*?)\)"
+        match = re.findall(file_counter_pattern, file_to_increment)
+        if match:
+            old = match[0]
+            # sometimes the regex increments the file extension
+            if old in extensions:
+                return file_to_increment
+            new_index = int(match.pop()) + 1
+            file_to_increment = file_to_increment.replace(old, str(new_index))
+        return file_to_increment
 
-
-def new_recording_file(file):
     parenthesis_pattern = "\((.*?)\)"
     capture_paren = "(.\(..*\))"
     date_pattern = "[0-9]*-[0-9]*-[0-9]*"
 
-    match_date = re.findall(date_pattern, file)
-    match_paren = re.findall(parenthesis_pattern, file)
-    match_to_remove = re.findall(capture_paren, file)
+    match_date = re.findall(date_pattern, found_newest_file)
+    match_paren = re.findall(parenthesis_pattern, found_newest_file)
+    match_to_remove = re.findall(capture_paren, found_newest_file)
     dte_str = ''
     dte_format = '%m-%d-%y'
     if match_date:
@@ -227,16 +229,16 @@ def new_recording_file(file):
         dte_match = datetime.datetime.strptime(dte_str, dte_format).strftime(dte_format)
         dte_today = datetime.datetime.now().strftime(dte_format)
         if dte_match != dte_today:
-            file = file.replace(dte_str, str(f'{dte_today}'))
+            found_newest_file = found_newest_file.replace(dte_str, str(f'{dte_today}'))
             if len(match_to_remove) == 1:  # remove parenthesis if first recording for today and last days has (2)
-                file = file.replace(match_to_remove.pop(), '')  # remove " (3)" from file name
+                found_newest_file = found_newest_file.replace(match_to_remove.pop(), '')  # remove " (3)" from file name
         if dte_match == dte_today:  # found a file with todays date should add the "( )"
             # add (2).mkv if file exists
             if len(match_paren) == 0:
-                file = file.replace(dte_str, str(f'{dte_today} (2)'))
+                found_newest_file = found_newest_file.replace(dte_str, str(f'{dte_today} (2)'))
             if len(match_paren) == 1:
-                file = increment_file_counter(file)
-        return file
+                found_newest_file = increment_file_counter(found_newest_file)
+        return found_newest_file
 
 
 def data_for_file(e):
@@ -310,7 +312,6 @@ def delete_last_row():
             end += 1
             writer.writerow(row)
 
-
     if end < start:
         return 'Deleted last row'
     else:
@@ -374,6 +375,7 @@ def update_last_row(times_str='10:10 mod'):
             writer.writerow(row)
     return last_row
 
+
 class h:
     htk_copy = None  # this attribute will hold instance of Hotkey
 
@@ -428,26 +430,29 @@ def text_test(e8_text_test):
 def cb_effects(e):
     if e.txt is None:
         return 'Hotkey has no text ', e.txt
-    print("callback: " + e.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
-    if 'mod' in e.txt:
-        print('Modifying...')
-        mod = e.txt
-        s_e_pattern = r"([-][0-9]*:[0-9]*|[0-9]*:[0-9]*)"
-        match_s_e_mod = re.findall(':', mod)
-        if len(match_s_e_mod) > 1 or len(match_s_e_mod) == 0:
-            return 'Invalid mod. Should be "10:00 mod" startSeconds:endSeconds modArg'
-        match_s_e_mod = re.match(s_e_pattern, mod)
-        if match_s_e_mod:
-            last_row = update_last_row(match_s_e_mod[0])
-            return last_row
+    if Data.is_recording:
+        print("callback: " + e.txt, 'recording: ', Data.is_recording, stopwatch.get_elapsed_time_str_not_formatted())
+        if 'mod' in e.txt:
+            print('Modifying...')
+            mod = e.txt
+            s_e_pattern = r"([-][0-9]*:[0-9]*|[0-9]*:[0-9]*)"
+            match_s_e_mod = re.findall(':', mod)
+            if len(match_s_e_mod) > 1 or len(match_s_e_mod) == 0:
+                return 'Invalid mod. Should be "10:00 mod" startSeconds:endSeconds modArg'
+            match_s_e_mod = re.match(s_e_pattern, mod)
+            if match_s_e_mod:
+                last_row = update_last_row(match_s_e_mod[0])
+                return last_row
+            else:
+                return 'No match for pattern "10:00 mod" startSeconds:endSeconds modArg when modifying last row'
+        elif 'del' in e.txt:
+            print('Deleting...')
+            return delete_last_row()
         else:
-            return 'No match for pattern "10:00 mod" startSeconds:endSeconds modArg when modifying last row'
-    elif 'del' in e.txt:
-        print('Deleting...')
-        return delete_last_row()
+            appended_data = data_for_file(e8)
+            return appended_data
     else:
-        appended_data = data_for_file(e8)
-        return appended_data
+        return 'Not recording'
 
 
 class e:
@@ -619,6 +624,7 @@ def script_description():
             "*** File format: the/path/to/fileName 12-01-22.mp4 \n\n"
             "Will have an instructional video on my YouTube channel\n"
             "https://youtube.com/@DEZACTUALDOS\n\n")
+
 
 try:
     S.obs_frontend_add_event_callback(frontend_event_handler)
