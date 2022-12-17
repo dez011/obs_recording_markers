@@ -73,7 +73,8 @@ def create_event_file():
             Data.events_path_from_gui = win_path
             print('Created event file windows test ', Data.events_path_from_gui)
     file_exists = Path(Data.events_path_from_gui).is_file()
-    print('Event file ', Data.events_path_from_gui, ' Recording path ', Data.recording_path_from_gui, ' Testing: ', Data.testing)
+    print('Event file ', Data.events_path_from_gui, ' Recording path ', Data.recording_path_from_gui, ' Testing: ',
+          Data.testing)
     # creates a new csv file with headers if it doesn't already exist
     with open(Data.events_path_from_gui, 'a') as csvfile:
         writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n', fieldnames=file_headers)
@@ -626,25 +627,26 @@ def script_save(settings):
 
 
 def script_description():
-    return ("OBS RECORDING MARKER will add hotkey events to a file\n"
-            "Which will later be used to automatically clip the VOD\n"
-            "OBS VOD Clipper and Manager coming soon!\n"
-            "\nVOD Clipper: Clips automatically from markers, \n\tcrop cam and stack for vertical videos"
-            "\nManager: Automatically upload videos and organize\n\n"
-            "ARGS:\targ\texplanation"
-            "\n\n\t40:10\tstart:end format will clip 40 seconds back \n\tand 10 seconds forward from timestamp"
-            "\n\n\t10:10 mod\twill modify last row and add (or subtract \n\tif - start or end) the seconds to start and/or end"
-            "\n\n\tdel\twill delete the last row"
-            "\n\n\t01:30:05\thh:mm:ss fomrat will clip one hour thirty minutes and \n\tfive seconds from captured time **mod doesn't \n\twork for this format\n\n"
+    description = ("OBS RECORDING MARKER will add hotkey events to a file\n"
+                   "Which will later be used to automatically clip the VOD\n"
+                   "OBS VOD Clipper and Manager coming soon!\n"
+                   "\nVOD Clipper: Clips automatically from markers, \n\tcrop cam and stack for vertical videos"
+                   "\nManager: Automatically upload videos and organize\n\n"
+                   "ARGS:\targ\texplanation"
+                   "\n\n\t40:10\tstart:end format will clip 40 seconds back \n\tand 10 seconds forward from timestamp"
+                   "\n\n\t10:10 mod\twill modify last row and add (or subtract \n\tif - start or end) the seconds to start and/or end"
+                   "\n\n\tdel\twill delete the last row"
+                   "\n\n\t01:30:05\thh:mm:ss fomrat will clip one hour thirty minutes and \n\tfive seconds from captured time **mod doesn't \n\twork for this format\n\n"
 
-            "Restart OBS after adding the script\n"
-            "You have to select a Python 3.6.X version folder \n\n"
-            "*** OBS Filename Formatting: STREAM %MM-%DD-%YY \n"
-            "*** Copy the OBS Recording Path to the script Recording Path field \n"
-            "*** Script Events path recommendation: \n\tUse/recording/path/SCRIPTS/Events.csv\n\n"
+                   "Restart OBS after adding the script\n"
+                   "You have to select a Python 3.6.X version folder \n\n"
+                   "*** OBS Filename Formatting: STREAM %MM-%DD-%YY \n"
+                   "*** Copy the OBS Recording Path to the script Recording Path field \n"
+                   "*** Script Events path recommendation: \n\tUse/recording/path/SCRIPTS/Events.csv\n\n"
 
-            "Will  have an instructional video on my YouTube channel!\n"
-            "https://youtube.com/@DEZACTUALDOS\n\n")
+                   "Will  have an instructional video on my YouTube channel!\n"
+                   "https://youtube.com/@DEZACTUALDOS\n\n")
+    return description
 
 
 try:
