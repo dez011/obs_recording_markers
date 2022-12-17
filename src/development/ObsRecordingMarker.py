@@ -1,16 +1,9 @@
 import csv
-import glob
-import os
-import pathlib
-import re
-import sys
-from threading import Thread
-import time
-from pathlib import Path
 import datetime
+import os
 import platform
-
-# import pandas as pd
+import re
+from pathlib import Path
 
 try:
     import obspython as S
@@ -33,14 +26,9 @@ TYPE = 'TYPE'
 
 TIME = 'TIME'
 
-# recording_path = "O:\RECORDINGS"
-
-# csv_file_name = "testScriptFile.csv"
-
 y_m_d_h_m_s = "%Y-%m-%d %H:%M:%S"
 
 extensions = ('*.mkv', '*.mov', '*.mp4', '*mkv')
-
 
 
 def get_sec(time_str='1:23:45'):
@@ -195,8 +183,8 @@ class Data:
 
 
 def get_processing_new_filename(found_newest_file):
-    #windows doesn't recognize the newest file until the obs thread
-    #finishes.  Implement thread to hopefully not need this
+    # windows doesn't recognize the newest file until the obs thread
+    # finishes.  Implement thread to hopefully not need this
     file_counter_pattern = "\(.*\)"
 
     def increment_file_counter(file_to_increment):
@@ -502,13 +490,13 @@ def frontend_event_handler(data):
     if data == S.OBS_FRONTEND_EVENT_RECORDING_STOPPED:
         window_start = False
         is_paused = False
-        is_recording = False
+        Data.is_recording = False
         stopwatch.stop()
         print('REC stops..')
 
     if data == S.OBS_FRONTEND_EVENT_RECORDING_PAUSED:
         is_paused = True
-        is_recording = False
+        Data.is_recording = False
         stopwatch.get_elapsed_time_str_not_formatted()
         stopwatch.pause()
         print('REC paused..')
@@ -566,7 +554,7 @@ def script_properties():
     S.obs_properties_add_text(props, "_text6", hotkey_6, S.OBS_TEXT_DEFAULT)
     S.obs_properties_add_text(props, "_text7", hotkey_7, S.OBS_TEXT_DEFAULT)
     S.obs_properties_add_text(props, "_text8", hotkey_8, S.OBS_TEXT_DEFAULT)
-#                                                propt   name      display
+    #                                                propt   name      display
     e_testing = S.obs_properties_add_bool(props, "_testing", "Testing Yes/No (Check/Uncheck)")
     e_recording_path = S.obs_properties_add_text(props, "_rec_path", "Recording Path", S.OBS_TEXT_DEFAULT)
     e_events_path = S.obs_properties_add_text(props, "_events_path", "Events Path", S.OBS_TEXT_DEFAULT)
@@ -607,8 +595,6 @@ def script_update(settings):
     e_testing.txt = _testing
 
 
-
-
 # STEP 5 ADD TO SCRIPT LOAD
 def script_load(settings):
     Data.recording_path_from_gui = S.obs_data_get_string(settings, "_rec_path")
@@ -640,20 +626,23 @@ def script_save(settings):
 
 def script_description():
     return ("OBS RECORDING MARKER will add hotkey events to a file\n"
-            "Which will later be used to automatically clip the VOD\n\n"
+            "Which will later be used to automatically clip the VOD\n"
+            "OBS VOD Clipper and Manager coming soon!"
+            "\nVOD Clipper: Clips automatically from markers, \n\tcrop cam and stack for vertical videos"
+            "\nManager: Automatically upload videos and move\n\n"
             "ARGS:\targ\texplanation"
             "\n\n\t40:10\tstart:end format will clip 40 seconds back \n\tand 10 seconds forward from timestamp"
             "\n\n\t10:10 mod\twill modify last row and add (or subtract \n\tif - start or end) the seconds to start and/or end"
             "\n\n\tdel\twill delete the last row"
             "\n\n\t01:30:05\thh:mm:ss fomrat will clip one hour thirty minutes and \n\tfive seconds from captured time **mod doesn't \n\twork for this format\n\n"
-            
+
             "Restart OBS after adding the script\n"
             "You have to select a Python 3.6.X version folder \n\n"
             "*** OBS Filename Formatting: STREAM %MM-%DD-%YY \n"
             "*** Copy the OBS Recording Path to the script Recording Path field \n"
             "*** Script Events path recommendation: \n\tUse/recording/path/SCRIPTS/Events.csv\n\n"
-            
-            "Will  have an instructional video on my YouTube channel\n" 
+
+            "Will  have an instructional video on my YouTube channel\n"
             "***Will have an instructional video on my YouTube channel\n"
             "***https://youtube.com/@DEZACTUALDOS\n\n")
 
