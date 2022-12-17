@@ -30,6 +30,8 @@ y_m_d_h_m_s = "%Y-%m-%d %H:%M:%S"
 
 extensions = ('*.mkv', '*.mov', '*.mp4', '*mkv')
 
+stable = False
+
 
 def get_sec(time_str='1:23:45'):
     """Get seconds from time."""
@@ -62,8 +64,7 @@ def append_data_to_file_from(json={TYPE: '00:00', TIME: '00:10:00'}):
 
 def create_event_file():
     os_ = platform.system()
-    print('Creating event file ', e_testing.txt, os_, Data.testing)
-    if Data.testing is True:
+    if Data.testing is True and stable is False:
         if os_ == 'Darwin':
             mac_path = str(Path('/Users/miguelhernandez/Documents/testObsScript') / Data.file_path_from_gui_name())
             Data.events_path_from_gui = mac_path
@@ -72,7 +73,7 @@ def create_event_file():
             Data.events_path_from_gui = win_path
             print('Created event file windows test ', Data.events_path_from_gui)
     file_exists = Path(Data.events_path_from_gui).is_file()
-
+    print('Event file ', Data.events_path_from_gui, ' Recording path ', Data.recording_path_from_gui, ' Testing: ', Data.testing)
     # creates a new csv file with headers if it doesn't already exist
     with open(Data.events_path_from_gui, 'a') as csvfile:
         writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n', fieldnames=file_headers)
@@ -231,7 +232,7 @@ def data_for_file(_e):
         Data.link_id = ''
         Data.recording_file = ''
         data = append_data_to_file_from(Data.to_json(Data))
-    elif Data.testing:
+    elif Data.testing and stable is False:
         Data.time = '00:00:00'
         Data.type = _e.txt
         Data.date = datetime.datetime.now().strftime(y_m_d_h_m_s)
@@ -423,7 +424,7 @@ def cb_effects(_e):
     print('CB Effects ', Data.recording_path_from_gui, Data.events_path_from_gui, Data.testing)
     if _e.txt is None:
         return 'Hotkey has no text ', _e.txt
-    if Data.is_recording or Data.testing is True:
+    if Data.is_recording or Data.testing is True and stable is False:
         print(f"Callback: {_e}" + _e.txt, 'recording: ', stopwatch.get_elapsed_time_str_not_formatted())
         if 'mod' in _e.txt:
             print('Modifying...')
@@ -555,7 +556,7 @@ def script_properties():
     S.obs_properties_add_text(props, "_text7", hotkey_7, S.OBS_TEXT_DEFAULT)
     S.obs_properties_add_text(props, "_text8", hotkey_8, S.OBS_TEXT_DEFAULT)
     #                                                propt   name      display
-    e_testing = S.obs_properties_add_bool(props, "_testing", "Testing Yes/No (Check/Uncheck)")
+    if stable is False: e_testing = S.obs_properties_add_bool(props, "_testing", "Testing Yes/No (Check/Uncheck)")
     e_recording_path = S.obs_properties_add_text(props, "_rec_path", "Recording Path", S.OBS_TEXT_DEFAULT)
     e_events_path = S.obs_properties_add_text(props, "_events_path", "Events Path", S.OBS_TEXT_DEFAULT)
     _remux = S.obs_properties_add_bool(props, "_remux", "Remux Yes/No (Check/Uncheck)")
@@ -627,9 +628,9 @@ def script_save(settings):
 def script_description():
     return ("OBS RECORDING MARKER will add hotkey events to a file\n"
             "Which will later be used to automatically clip the VOD\n"
-            "OBS VOD Clipper and Manager coming soon!"
+            "OBS VOD Clipper and Manager coming soon!\n"
             "\nVOD Clipper: Clips automatically from markers, \n\tcrop cam and stack for vertical videos"
-            "\nManager: Automatically upload videos and move\n\n"
+            "\nManager: Automatically upload videos and organize\n\n"
             "ARGS:\targ\texplanation"
             "\n\n\t40:10\tstart:end format will clip 40 seconds back \n\tand 10 seconds forward from timestamp"
             "\n\n\t10:10 mod\twill modify last row and add (or subtract \n\tif - start or end) the seconds to start and/or end"
@@ -642,9 +643,8 @@ def script_description():
             "*** Copy the OBS Recording Path to the script Recording Path field \n"
             "*** Script Events path recommendation: \n\tUse/recording/path/SCRIPTS/Events.csv\n\n"
 
-            "Will  have an instructional video on my YouTube channel\n"
-            "***Will have an instructional video on my YouTube channel\n"
-            "***https://youtube.com/@DEZACTUALDOS\n\n")
+            "Will  have an instructional video on my YouTube channel!\n"
+            "https://youtube.com/@DEZACTUALDOS\n\n")
 
 
 try:
