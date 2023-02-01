@@ -152,7 +152,8 @@ class StopWatch:
 
     def get_elapsed_time_int_for_file(self):
         if Data.is_recording is True:
-            return int(self.get_elapsed_time_str_not_formatted())
+            tme = int(self.get_elapsed_time_str_not_formatted())
+            return tme
         else:
             return None
 
@@ -196,6 +197,7 @@ def get_processing_new_filename(found_newest_file):
             temp_file_num = old_paren.replace('(', '').replace(')', '')
             new_index = int(temp_file_num) + 1
             file_to_increment = file_to_increment.replace(old_paren, str(f'({new_index})'))
+        print('Incremented file ', file_to_increment)
         return file_to_increment
 
     capture_paren = "(.\(..*\))"
@@ -220,6 +222,7 @@ def get_processing_new_filename(found_newest_file):
                 found_newest_file = found_newest_file.replace(dte_str, str(f'{dte_today} (2)'))
             if match_paren:
                 found_newest_file = increment_file_counter(found_newest_file)
+        print('Returning new found file ', found_newest_file)
         return found_newest_file
 
 
@@ -486,19 +489,16 @@ def frontend_event_handler(data):
         Data.link_id = ''
         Data.recording_file = file
         append_data_to_file_from(Data.to_json(Data))
-        Data.is_recording = True
         print('REC started..')
 
     if data == S.OBS_FRONTEND_EVENT_RECORDING_STOPPED:
         window_start = False
         is_paused = False
-        Data.is_recording = False
         stopwatch.stop()
         print('REC stops..')
 
     if data == S.OBS_FRONTEND_EVENT_RECORDING_PAUSED:
         is_paused = True
-        Data.is_recording = False
         stopwatch.get_elapsed_time_str_not_formatted()
         stopwatch.pause()
         print('REC paused..')
