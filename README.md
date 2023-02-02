@@ -34,22 +34,20 @@ ARGS:	arg - explanation
 		   this format
 		   Restart OBS after adding the script
 		   
-You have to select a Python 3.6.X version folder 
+You have to select a Python 3.6.X version folder <br>
 
 *** OBS Filename Formatting (Stream is the name of your file, must have the date in that format, 
-    do not check save file without spaces): STREAM %MM-%DD-%YY 
-*** Copy the OBS Recording Path to the script Recording Path field 
-*** Script Events path recommendation: Use/recording/path/SCRIPTS/Events.csv
+    do not check save file without spaces): STREAM %MM-%DD-%YY <br>
+
+*** Copy the OBS Recording Path to the script Recording Path field <br>
+
+*** Script Events path recommendation: Use/recording/path/SCRIPTS/Events.csv<br>
 <br>
 Exaple of how the hotkeys in tools -> scripts -> click ObsRecoirdingMarker.py<br>
-Hotkey 1: 45:10<br>
-								
-Hotkey 2: 10:10	<br>
-								
+Hotkey 1: 45:10<br>								
+Hotkey 2: 10:10	<br>								
 Hotkey 3: 00:30:00<br>
-
-Hotkey 4: 30:00 mod<br>
-					
+Hotkey 4: 30:00 mod<br>		
 Hotkey 5: del<br>
 
 
