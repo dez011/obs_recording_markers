@@ -1,6 +1,25 @@
 # obs_recording_markers
-
 Installation
+
+Downloading Python 3.6 on Windows
+
+Go to the Python official website.
+Click on the Python 3.6 version link.
+Download the Windows Installer for Python 3.6.
+Open the installer and follow the steps to complete the installation.
+Setting the Path
+
+Right-click on the Computer icon and select Properties.
+Click on Advanced system settings.
+Click on the Environment Variables button.
+Under System Variables, scroll down and find the Path variable.
+Click on Edit.
+Add the path to the Python installation (e.g., C:\Python36\).
+Click OK to save the changes.
+Open a new Command Prompt window to verify that the path has been set correctly by running python --version.
+That's it! Python 3.6 has now been installed and its path has been set on your Windows system.
+
+
 
 The script tested with OBS Studio versions 27.x and using python 3.6. 
 
