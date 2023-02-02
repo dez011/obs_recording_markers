@@ -19,24 +19,39 @@ VOD Clipper: Clips automatically from markers,
 	crop cam and stack for vertical videos
 Manager: Automatically upload videos and organize
 
-ARGS:	arg	explanation
+ARGS:	arg - explanation
 
-	40:10	start:end format will clip 40 seconds back 
-	and 10 seconds forward from timestamp
+	40:10 - start:end format will clip 40 seconds back 
+	        and 10 seconds forward from timestamp
 
-	10:10 mod	will modify last row and add (or subtract 
-	if - start or end) the seconds to start and/or end
+	10:10 mod - will modify last row and add (or subtract if - start 
+	            or end) the seconds to start and/or end
 
-	del	will delete the last row
+	del - will delete the last row
 
-	01:30:05	hh:mm:ss fomrat will clip one hour thirty minutes and 
-	five seconds from captured time **mod doesn't 
-	work for this format
+	01:30:05 - hh:mm:ss fomrat will clip one hour thirty minutes and 
+	           five seconds from captured time mod doesn't work for 
+		   this format
+		   Restart OBS after adding the script
+		   
+You have to select a Python 3.6.X version folder <br>
 
-Restart OBS after adding the script
-You have to select a Python 3.6.X version folder 
+*** OBS Filename Formatting (Stream is the name of your file, must have the date in that format, 
+    do not check save file without spaces): STREAM %MM-%DD-%YY <br>
 
-*** OBS Filename Formatting: STREAM %MM-%DD-%YY 
-*** Copy the OBS Recording Path to the script Recording Path field 
-*** Script Events path recommendation: 
-	Use/recording/path/SCRIPTS/Events.csv
+*** Copy the OBS Recording Path to the script Recording Path field <br>
+
+*** Script Events path recommendation: Use/recording/path/SCRIPTS/Events.csv<br>
+<br>
+Exaple of how the hotkeys in tools -> scripts -> click ObsRecoirdingMarker.py<br>
+Hotkey 1: 45:10<br>								
+Hotkey 2: 10:10	<br>								
+Hotkey 3: 00:30:00<br>
+Hotkey 4: 30:00 mod<br>		
+Hotkey 5: del<br>
+
+
+   	
+		   
+
+
