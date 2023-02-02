@@ -32,8 +32,7 @@ ARGS:	arg - explanation
 	01:30:05 - hh:mm:ss fomrat will clip one hour thirty minutes and 
 	           five seconds from captured time mod doesn't work for 
 		   this format
-
-Restart OBS after adding the script
+		   Restart OBS after adding the script
 You have to select a Python 3.6.X version folder 
 
 *** OBS Filename Formatting (Stream is the name of your file, must have the date in that format, 
@@ -47,3 +46,8 @@ Hotkey 2: 10:10
 Hotkey 3: 00:30:00
 Hotkey 4: 30:00 mod
 Hotkey 5: del
+
+   	
+		   
+
+
