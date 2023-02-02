@@ -1,23 +1,29 @@
 # obs_recording_markers
 Installation
 
-Downloading Python 3.6 on Windows
+<h2>Downloading Python 3.6 on Windows</h2>
 
-Go to the Python official website.
-Click on the Python 3.6 version link.
-Download the Windows Installer for Python 3.6.
-Open the installer and follow the steps to complete the installation.
-Setting the Path
+<ol>
+  <li>Go to the <a href="https://www.python.org/downloads/">Python official website</a>.</li>
+  <li>Click on the Python 3.6 version link.</li>
+  <li>Download the Windows Installer for Python 3.6.</li>
+  <li>Open the installer and follow the steps to complete the installation.</li>
+</ol>
 
-Right-click on the Computer icon and select Properties.
-Click on Advanced system settings.
-Click on the Environment Variables button.
-Under System Variables, scroll down and find the Path variable.
-Click on Edit.
-Add the path to the Python installation (e.g., C:\Python36\).
-Click OK to save the changes.
-Open a new Command Prompt window to verify that the path has been set correctly by running python --version.
-That's it! Python 3.6 has now been installed and its path has been set on your Windows system.
+<h2>Setting the Path</h2>
+
+<ol>
+  <li>Right-click on the Computer icon and select Properties.</li>
+  <li>Click on Advanced system settings.</li>
+  <li>Click on the Environment Variables button.</li>
+  <li>Under System Variables, scroll down and find the Path variable.</li>
+  <li>Click on Edit.</li>
+  <li>Add the path to the Python installation (e.g., `C:\Python36\`).</li>
+  <li>Click OK to save the changes.</li>
+  <li>Open a new Command Prompt window to verify that the path has been set correctly by running `python --version`.</li>
+</ol>
+
+<p>That's it! Python 3.6 has now been installed and its path has been set on your Windows system.</p>
 
 
 
