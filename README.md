@@ -43,7 +43,7 @@ Hotkey 1: 45:10<br>
 Hotkey 2: 10:10	<br>								
 Hotkey 3: 00:30:00<br>
 Hotkey 4: 30:00 mod<br>		
-Hotkey 5: del<br>
+Hotkey 5: del<br> 
 
 
    	
