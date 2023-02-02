@@ -23,15 +23,14 @@
   <li>settings -> hotkeys. Add your hotkeys to Hotkey 1-7 if you are using them</li>
 </ol>
 
-OBS RECORDING MARKER will add hotkey events to a file
-Which will later be used to automatically clip the VOD
-OBS <br>
+<h4>OBS RECORDING MARKER will add hotkey events to a file
+Which will later be used to automatically clip the VOD</h4>
 
-<h2>Other products worth using</h2>
-<h3>Catch a clip. (OBS Automatic VOC Clipper)
+<h3>Other products worth using</h3>
+<h3>Catch a clip. (OBS Automatic VOD Clipper)
 <p>Will use the file generated here to clip your content<p>
 
-<h2>Example of valid input in the hotkey text fields (tools -> scripts -> pyscript.py: valid ex.: 40:40)<h2>
+<h3>Example of valid input in the hotkey text fields (tools -> scripts -> pyscript.py: valid ex.: 40:40)<h3>
 <ol>
 	<li>40:10 - start:end format will clip 40 seconds back 
 		and 10 seconds forward from timestamp</li>
@@ -49,7 +48,7 @@ OBS <br>
 <h2>OBS Filename Formatting (Stream is the name of your file, must have the date in that format, 
 	do not check save file without spaces): STREAM %MM-%DD-%YY </h2>
 
-	<h3>Exaple of how the hotkeys in tools -> scripts -> click ObsRecoirdingMarker.py</h3>
+	<h3>Exaples</h3>
 Hotkey 1: 45:10<br>								
 Hotkey 2: 10:10	<br>								
 Hotkey 3: 00:30:00<br>
