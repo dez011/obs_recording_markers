@@ -40,13 +40,18 @@ You have to select a Python 3.6.X version folder
     do not check save file without spaces): STREAM %MM-%DD-%YY 
 *** Copy the OBS Recording Path to the script Recording Path field 
 *** Script Events path recommendation: Use/recording/path/SCRIPTS/Events.csv
+<br>
+Exaple of how the hotkeys in tools -> scripts -> click ObsRecoirdingMarker.py<br>
+Hotkey 1: 45:10<br>
+								
+Hotkey 2: 10:10	<br>
+								
+Hotkey 3: 00:30:00<br>
 
-Exaple of how the hotkeys in tools -> scripts -> click ObsRecoirdingMarker.py
-Hotkey 1: 45:10								
-Hotkey 2: 10:10									
-Hotkey 3: 00:30:00
-Hotkey 4: 30:00 mod					
-Hotkey 5: del
+Hotkey 4: 30:00 mod<br>
+					
+Hotkey 5: del<br>
+
 
    	
 		   
