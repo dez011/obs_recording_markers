@@ -33,6 +33,7 @@ ARGS:	arg - explanation
 	           five seconds from captured time mod doesn't work for 
 		   this format
 		   Restart OBS after adding the script
+		   
 You have to select a Python 3.6.X version folder 
 
 *** OBS Filename Formatting (Stream is the name of your file, must have the date in that format, 
@@ -41,10 +42,10 @@ You have to select a Python 3.6.X version folder
 *** Script Events path recommendation: Use/recording/path/SCRIPTS/Events.csv
 
 Exaple of how the hotkeys in tools -> scripts -> click ObsRecoirdingMarker.py
-Hotkey 1: 45:10
-Hotkey 2: 10:10
+Hotkey 1: 45:10								
+Hotkey 2: 10:10									
 Hotkey 3: 00:30:00
-Hotkey 4: 30:00 mod
+Hotkey 4: 30:00 mod					
 Hotkey 5: del
 
    	
