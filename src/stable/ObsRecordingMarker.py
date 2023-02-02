@@ -54,6 +54,9 @@ file_headers = [('%s' % TIME), ('%s' % TYPE), DATE, STATUS, LINK_ID, FILE]
 def append_data_to_file_from(json={TYPE: '00:00', TIME: '00:10:00'}):
     # list of column names
     # Dictionary that we want to add as a new row
+    if Data.events_path_from_gui is None or Data.events_path_from_gui == '':
+        print('Csv file is not set in script settings: ', Data.events_path_from_gui)
+        return
     with open(Data.events_path_from_gui, 'a') as f_object:
         # with open(file_path, 'a') as f_object:
         dictwriter_object = csv.DictWriter(f_object, fieldnames=file_headers, lineterminator='\n')
@@ -75,8 +78,13 @@ def create_event_file():
     file_exists = Path(Data.events_path_from_gui).is_file()
     print('Event file ', Data.events_path_from_gui, ' Recording path ', Data.recording_path_from_gui, ' Testing: ',
           Data.testing)
+    if Data.events_path_from_gui is None or Data.events_path_from_gui == '':
+        print('Csv file not valid: ', Data.events_path_from_gui)
+        return
     # creates a new csv file with headers if it doesn't already exist
+    print('Creating new Csv File: ', file_exists)
     with open(Data.events_path_from_gui, 'a') as csvfile:
+        print(Path(str(csvfile)).absolute())
         writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n', fieldnames=file_headers)
         if not file_exists:
             writer.writeheader()
@@ -104,6 +112,8 @@ def most_recent_file(path_list=[]):
     path_list = list_files(path_list)
 
     file_c_time = {}
+    print("Looking for most recent file\nMake sure you dont have any other video files that dont match\nthe"
+          "expected format for the script")
     for path in path_list:
         c_timestamp = Path(path).stat().st_ctime
         c_time = datetime.datetime.fromtimestamp(c_timestamp)
@@ -208,6 +218,7 @@ def get_processing_new_filename(found_newest_file):
     match_to_remove = re.findall(capture_paren, found_newest_file)
     dte_str = ''
     dte_format = '%m-%d-%y'
+
     if match_date:
         dte_str = match_date[0]
         dte_match = datetime.datetime.strptime(dte_str, dte_format).strftime(dte_format)
