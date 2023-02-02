@@ -73,7 +73,8 @@ def create_event_file():
             Data.events_path_from_gui = win_path
             print('Created event file windows test ', Data.events_path_from_gui)
     file_exists = Path(Data.events_path_from_gui).is_file()
-    print('Event file ', Data.events_path_from_gui, ' Recording path ', Data.recording_path_from_gui, ' Testing: ', Data.testing)
+    print('Event file ', Data.events_path_from_gui, ' Recording path ', Data.recording_path_from_gui, ' Testing: ',
+          Data.testing)
     # creates a new csv file with headers if it doesn't already exist
     with open(Data.events_path_from_gui, 'a') as csvfile:
         writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n', fieldnames=file_headers)
@@ -151,7 +152,8 @@ class StopWatch:
 
     def get_elapsed_time_int_for_file(self):
         if Data.is_recording is True:
-            return int(self.get_elapsed_time_str_not_formatted())
+            tme = int(self.get_elapsed_time_str_not_formatted())
+            return tme
         else:
             return None
 
@@ -195,6 +197,7 @@ def get_processing_new_filename(found_newest_file):
             temp_file_num = old_paren.replace('(', '').replace(')', '')
             new_index = int(temp_file_num) + 1
             file_to_increment = file_to_increment.replace(old_paren, str(f'({new_index})'))
+        print('Incremented file ', file_to_increment)
         return file_to_increment
 
     capture_paren = "(.\(..*\))"
@@ -219,6 +222,7 @@ def get_processing_new_filename(found_newest_file):
                 found_newest_file = found_newest_file.replace(dte_str, str(f'{dte_today} (2)'))
             if match_paren:
                 found_newest_file = increment_file_counter(found_newest_file)
+        print('Returning new found file ', found_newest_file)
         return found_newest_file
 
 
@@ -485,19 +489,16 @@ def frontend_event_handler(data):
         Data.link_id = ''
         Data.recording_file = file
         append_data_to_file_from(Data.to_json(Data))
-        Data.is_recording = True
         print('REC started..')
 
     if data == S.OBS_FRONTEND_EVENT_RECORDING_STOPPED:
         window_start = False
         is_paused = False
-        Data.is_recording = False
         stopwatch.stop()
         print('REC stops..')
 
     if data == S.OBS_FRONTEND_EVENT_RECORDING_PAUSED:
         is_paused = True
-        Data.is_recording = False
         stopwatch.get_elapsed_time_str_not_formatted()
         stopwatch.pause()
         print('REC paused..')
@@ -626,25 +627,24 @@ def script_save(settings):
 
 
 def script_description():
-    return ("OBS RECORDING MARKER will add hotkey events to a file\n"
-            "Which will later be used to automatically clip the VOD\n"
-            "OBS VOD Clipper and Manager coming soon!\n"
-            "\nVOD Clipper: Clips automatically from markers, \n\tcrop cam and stack for vertical videos"
-            "\nManager: Automatically upload videos and organize\n\n"
-            "ARGS:\targ\texplanation"
-            "\n\n\t40:10\tstart:end format will clip 40 seconds back \n\tand 10 seconds forward from timestamp"
-            "\n\n\t10:10 mod\twill modify last row and add (or subtract \n\tif - start or end) the seconds to start and/or end"
-            "\n\n\tdel\twill delete the last row"
-            "\n\n\t01:30:05\thh:mm:ss fomrat will clip one hour thirty minutes and \n\tfive seconds from captured time **mod doesn't \n\twork for this format\n\n"
+    description = ("OBS RECORDING MARKER will add hotkey events to a file\n"
+                   "Which will later be used to automatically clip the VOD\n"
+                   "OBS VOD Clipper and Manager coming soon!\n"
+                   "\nVOD Clipper: Clips automatically from markers, \n\tcrop cam and stack for vertical videos"
+                   "\nManager: Automatically upload videos and organize\n\n"
 
-            "Restart OBS after adding the script\n"
-            "You have to select a Python 3.6.X version folder \n\n"
-            "*** OBS Filename Formatting: STREAM %MM-%DD-%YY \n"
-            "*** Copy the OBS Recording Path to the script Recording Path field \n"
-            "*** Script Events path recommendation: \n\tUse/recording/path/SCRIPTS/Events.csv\n\n"
+                   "Go to this link for examples:\n"
+                   "https://github.com/dez011/obs_recording_markers/blob/master/README.md\n\n"
 
-            "Will  have an instructional video on my YouTube channel!\n"
-            "https://youtube.com/@DEZACTUALDOS\n\n")
+                   "Restart OBS after adding the script\n"
+                   "You have to select a Python 3.6.X version folder \n\n"
+                   "*** OBS Filename Formatting: STREAM %MM-%DD-%YY \n"
+                   "*** Copy the OBS Recording Path to the script Recording Path field \n"
+                   "*** Script Events path recommendation: \n\tUse/recording/path/SCRIPTS/Events.csv\n\n"
+
+                   "Will  have an instructional video on my YouTube channel!\n"
+                   "https://youtube.com/@DEZACTUALDOS\n\n")
+    return description
 
 
 try:
