@@ -32,3 +32,7 @@ class Test(TestCase):
 
         appended = cb8(True, '10:10')
         assert 'Appended to file' in appended[0]
+
+    def test_most_recent_file(self):
+        print('\n')
+        most_recent = most_recent_file(['O:\RECORDINGS'])
