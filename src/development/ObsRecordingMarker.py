@@ -633,7 +633,7 @@ def script_description():
                    "\nVOD Clipper: Clips automatically from markers, \n\tcrop cam and stack for vertical videos"
                    "\nManager: Automatically upload videos and organize\n\n"
 
-                   "Go to this link for examples\n:"
+                   "Go to this link for examples:\n"
                    "https://github.com/dez011/obs_recording_markers/blob/master/README.md\n\n"
 
                    "Restart OBS after adding the script\n"
