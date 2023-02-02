@@ -26,11 +26,11 @@
 <h4>OBS RECORDING MARKER will add hotkey events to a file
 Which will later be used to automatically clip the VOD</h4>
 
-<h3>Other products worth using</h3>
+<h2>Other products worth using</h2>
 <h3>Catch a clip. (OBS Automatic VOD Clipper)
 <p>Will use the file generated here to clip your content<p>
 
-<h3>Example of valid input in the hotkey text fields (tools -> scripts -> pyscript.py: valid ex.: 40:40)<h3>
+<h3>Example of valid input in the hotkey text fields (tools -> scripts -> pyscript.py: valid ex.: 40:40)</h3>
 <ol>
 	<li>40:10 - start:end format will clip 40 seconds back 
 		and 10 seconds forward from timestamp</li>
