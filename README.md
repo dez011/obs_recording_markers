@@ -37,11 +37,8 @@ Which will later be used to automatically clip the VOD</h4>
 	<li>del - will delete the last row</li>
 	<li>01:30:05 - hh:mm:ss fomrat will clip one hour thirty minutes and five seconds from captured time mod doesn't work forthis format</li>
 </ol>
-
-<h2>OBS Filename Formatting (Stream is the name of your file, must have the date in that format, 
-	do not check save file without spaces): STREAM %MM-%DD-%YY </h2>
-
-	<h3>Exaples</h3>
+<h2>OBS Filename Formatting (Stream is the name of your file, must have the date in that format, do not check save file without spaces): STREAM %MM-%DD-%YY </h2>
+<h4>Exaples</h4>
 Hotkey 1: 45:10<br>								
 Hotkey 2: 10:10	<br>								
 Hotkey 3: 00:30:00<br>
