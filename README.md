@@ -17,7 +17,7 @@
   <li>Then tab over to scripts press + and find the script</li>
   <li>Set up the Hotkeys (8 fields, don't have to use all)</li>
   <li>Copy your OBS output directory in the Recording Path field</li>
-  <li>Enter a name for your file with a .csv extension ie. Events.csv.  Might have to enter an absolute path if you do not see your file when you    c           restart OBS</li>
+  <li>Enter a name for your file with a .csv extension ie. Events.csv.  Might have to enter an absolute path if you do not see your file when you restart OBS</li>
   <li>If you use .mp4 files checking/unchecking the Remux box will not affect anything.  If you record in .mkv and remux check this box</li>
   <li>Restart OBS</li>
   <li>settings -> hotkeys. Add your hotkeys to Hotkey 1-7 if you are using them</li>
@@ -32,17 +32,10 @@ Which will later be used to automatically clip the VOD</h4>
 
 <h3>Example of valid input in the hotkey text fields (tools -> scripts -> pyscript.py: valid ex.: 40:40)</h3>
 <ol>
-	<li>40:10 - start:end format will clip 40 seconds back 
-		and 10 seconds forward from timestamp</li>
-
-	<li>10:10 mod - will modify last row and add (or subtract if - start 
-		or end) the seconds to start and/or end</li>
-
+	<li>40:10 - start:end format will clip 40 seconds back and 10 seconds forward from timestamp</li>
+	<li>10:10 mod - will modify last row and add (or subtract if - start or end) the seconds to start and/or end</li>
 	<li>del - will delete the last row</li>
-
-	<li>01:30:05 - hh:mm:ss fomrat will clip one hour thirty minutes and 
-	           five seconds from captured time mod doesn't work for 
-		this format</li>
+	<li>01:30:05 - hh:mm:ss fomrat will clip one hour thirty minutes and five seconds from captured time mod doesn't work forthis format</li>
 </ol>
 
 <h2>OBS Filename Formatting (Stream is the name of your file, must have the date in that format, 
