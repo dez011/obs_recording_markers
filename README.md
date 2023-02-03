@@ -1,4 +1,6 @@
 # obs_recording_markers
+<h2>Will have tutorials on this on my YouTube channel as well as Warzone and other gaming content</h2>
+<a href="https://www.youtube.com/c/DEZACTUALTWO?sub_confirmation=1">Subscribe to DEZACTUALTWO on YouTube</a>
 <h1>Installation</h1>
 
 <h2>Get the python path if you have a valid version installer or download Python 3.6 on Windows</h2>
