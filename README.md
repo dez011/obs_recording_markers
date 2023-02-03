@@ -1,6 +1,8 @@
 # obs_recording_markers
-<h1>Installation</h1>
+<h2>Will have tutorials on this on my YouTube channel as well as Warzone and other gaming content</h2>
+<a href="https://www.youtube.com/c/DEZACTUALTWO?sub_confirmation=1">Subscribe to DEZACTUALTWO on YouTube</a>
 
+<h1>Installation</h1>
 <h2>Get the python path if you have a valid version installer or download Python 3.6 on Windows</h2>
 <h3> 3.6 works with obs version 27 - 29.  If you have a different version check if your obs version supports it </h3>
 <ol>
