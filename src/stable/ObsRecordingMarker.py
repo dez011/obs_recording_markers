@@ -54,6 +54,8 @@ file_headers = [('%s' % TIME), ('%s' % TYPE), DATE, STATUS, LINK_ID, FILE]
 def append_data_to_file_from(json={TYPE: '00:00', TIME: '00:10:00'}):
     # list of column names
     # Dictionary that we want to add as a new row
+    if Data.testing is True:
+        return 'Appended to file test ', json
     if Data.events_path_from_gui is None or Data.events_path_from_gui == '':
         print('Csv file is not set in script settings: ', Data.events_path_from_gui)
         return
@@ -336,6 +338,18 @@ def update_last_row(times_str='10:10 mod'):
     def to_string(type_left, type_right):
         return f'{type_left}:{type_right}'
 
+    if Data.testing and Data.events_path_from_gui == 'testing.csv':
+        start_time, end_time = get_times(times_str)
+
+        start_diff = 10
+        end_diff = 200
+
+        start_diff += start_time
+        end_diff += end_time
+
+        return to_string(start_diff, end_diff)
+
+
     # Open the input CSV file in read mode
     with open(Data.events_path_from_gui, 'r') as input_file:
         # Create a CSV reader
@@ -424,7 +438,8 @@ def cb7(pressed):
 
 
 def cb8(pressed, e_text_test='ONLY FOR TESTS'):
-    # text_test(e_text_test)
+    if Data.testing:
+        text_test(e_text_test)
     if pressed:
         print('\nPressed CB8')
         return cb_effects(e8)
@@ -448,11 +463,13 @@ def cb_effects(_e):
             match_s_e_mod = re.findall(':', mod)
             if len(match_s_e_mod) > 1 or len(match_s_e_mod) == 0:
                 return 'Invalid mod. Should be "10:00 mod" startSeconds:endSeconds modArg'
-            match_s_e_mod = re.match(s_e_pattern, mod)
+            match_s_e_mod = re.search(s_e_pattern, mod)
             if match_s_e_mod:
                 # last_row = update_last_row(match_s_e_mod[0])
                 x = _e.txt.split(" ")
-                x = x[0]
+                for item in _e.txt.split(" "):
+                    if ':' in item:
+                        x = item
                 last_row = update_last_row(x)
                 return last_row
             else:
@@ -640,21 +657,18 @@ def script_save(settings):
 def script_description():
     description = ("OBS RECORDING MARKER will add hotkey events to a file\n"
                    "Which will later be used to automatically clip the VOD\n"
-                   "OBS VOD Clipper and Manager coming soon!\n"
-                   "\nVOD Clipper: Clips automatically from markers, \n\tcrop cam and stack for vertical videos"
-                   "\nManager: Automatically upload videos and organize\n\n"
+                   "OBS VOD Clipper coming soon!\n"
+                   "\nVOD Clipper: Clips automatically from markers, \n"
 
                    "Go to this link for examples:\n"
                    "https://github.com/dez011/obs_recording_markers/blob/master/README.md\n\n"
 
                    "Restart OBS after adding the script\n"
                    "You have to select a Python 3.6.X version folder \n\n"
-                   "*** OBS Filename Formatting: STREAM %MM-%DD-%YY \n"
+                   "*** OBS Filename Formatting: STREAM %MM-%DD-%YY (setting in obs) \n"
                    "*** Copy the OBS Recording Path to the script Recording Path field \n"
                    "*** Script Events path recommendation: \n\tUse/recording/path/SCRIPTS/Events.csv\n\n"
-
-                   "Will  have an instructional video on my YouTube channel!\n"
-                   "https://youtube.com/@DEZACTUALDOS\n\n")
+                )
     return description
 
 
