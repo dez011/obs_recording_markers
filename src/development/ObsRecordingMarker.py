@@ -51,9 +51,11 @@ def get_time_hh_mm_ss(seconds=0):
 file_headers = [('%s' % TIME), ('%s' % TYPE), DATE, STATUS, LINK_ID, FILE]
 
 
-def append_data_to_file_from(json={TYPE: '00:00', TIME: '00:10:00'}):
+def append_data_to_file_from(json={TYPE: '00:00', TIME: '00:10:00'}, dataPathForTest=None):
     # list of column names
     # Dictionary that we want to add as a new row
+    if dataPathForTest is not None:
+        Data.events_path_from_gui = dataPathForTest
     if Data.events_path_from_gui is None or Data.events_path_from_gui == '':
         print('Csv file is not set in script settings: ', Data.events_path_from_gui)
         return
