@@ -3,6 +3,7 @@ import datetime
 import os
 import platform
 import re
+import json
 from pathlib import Path
 
 try:
@@ -31,6 +32,61 @@ y_m_d_h_m_s = "%Y-%m-%d %H:%M:%S"
 extensions = ('*.mkv', '*.mov', '*.mp4', '*mkv')
 
 stable = True
+
+# Define path to the configuration file
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE_PATH = os.path.join(SCRIPT_DIR, 'config.json')
+
+
+def save_config():
+    config_data = {}
+
+    # Check if file exists, if yes then load existing values
+    if os.path.exists(CONFIG_FILE_PATH):
+        with open(CONFIG_FILE_PATH, 'r') as file:
+            config_data = json.load(file)
+
+    # For each hotkey, only update its value if the new value is not blank
+    if e1.txt.strip():
+        config_data['e1'] = e1.txt
+    if e2.txt.strip():
+        config_data['e2'] = e2.txt
+    if e3.txt.strip():
+        config_data['e3'] = e3.txt
+    if e4.txt.strip():
+        config_data['e4'] = e4.txt
+    if e5.txt.strip():
+        config_data['e5'] = e5.txt
+    if e6.txt.strip():
+        config_data['e6'] = e6.txt
+    if e7.txt.strip():
+        config_data['e7'] = e7.txt
+    if e8.txt.strip():
+        config_data['e8'] = e8.txt
+
+    # Now save the updated configuration data
+    with open(CONFIG_FILE_PATH, 'w') as file:
+        print('saving config')
+        print(config_data)
+        json.dump(config_data, file)
+
+
+def load_config():
+    print('opening config')
+
+    if os.path.exists(CONFIG_FILE_PATH):
+        with open(CONFIG_FILE_PATH, 'r') as file:
+            config_data = json.load(file)
+            print(config_data)
+            e1.txt = config_data.get('e1', e1.txt)
+            e2.txt = config_data.get('e2', e2.txt)
+            e3.txt = config_data.get('e3', e3.txt)
+            e4.txt = config_data.get('e4', e4.txt)
+            e5.txt = config_data.get('e5', e5.txt)
+            e6.txt = config_data.get('e6', e6.txt)
+            e7.txt = config_data.get('e7', e7.txt)
+            e8.txt = config_data.get('e8', e8.txt)
+
 
 
 def get_sec(time_str='1:23:45'):
@@ -623,6 +679,7 @@ def script_update(settings):
     e_events_path.txt = _events_path
     e_remux.txt = _remux
     e_testing.txt = _testing
+    save_config()
 
 
 # STEP 5 ADD TO SCRIPT LOAD
@@ -640,6 +697,25 @@ def script_load(settings):
     h6.htk_copy = Application(cb6, settings, "Htk_6")
     h7.htk_copy = Application(cb7, settings, "Htk_7")
     h8.htk_copy = Application(cb8, settings, "Htk_8")
+    load_config()
+    # S.obs_data_set_string(settings, "_text3", e1.txt)
+    if not S.obs_data_get_string(settings, "_text1"):
+        S.obs_data_set_string(settings, "_text1", e1.txt)
+    if not S.obs_data_get_string(settings, "_text2"):
+        S.obs_data_set_string(settings, "_text2", e2.txt)
+    if not S.obs_data_get_string(settings, "_text3"):
+        S.obs_data_set_string(settings, "_text3", e3.txt)
+    if not S.obs_data_get_string(settings, "_text4"):
+        S.obs_data_set_string(settings, "_text4", e4.txt)
+    if not S.obs_data_get_string(settings, "_text5"):
+        S.obs_data_set_string(settings, "_text5", e5.txt)
+    if not S.obs_data_get_string(settings, "_text6"):
+        S.obs_data_set_string(settings, "_text6", e6.txt)
+    if not S.obs_data_get_string(settings, "_text7"):
+        S.obs_data_set_string(settings, "_text7", e7.txt)
+    if not S.obs_data_get_string(settings, "_text8"):
+        S.obs_data_set_string(settings, "_text8", e8.txt)
+
 
 
 # STEP 5 ADD TO SCRIPT SAVE
